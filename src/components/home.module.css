@@ -9,12 +9,6 @@
     --border-color: #dee2e6;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background-color: var(--light-grey);
@@ -23,14 +17,14 @@ body {
 }
 
 /* --- Cabecera --- */
-header {
+.header {
     background-color: #1A3258;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     padding: 1rem 5%;
     border-bottom: 3px solid var(--udg-yellow);
 }
 
-.header-container {
+.headerContainer {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -57,13 +51,13 @@ nav a:hover {
     color: var(--udg-blue);
 }
 
-.header-right {
+.headerRight {
     display: flex;
     align-items: center;
     gap: 1.5rem;
 }
 
-.login-btn {
+.loginBtn {
     background-color: var(--udg-blue);
     color: white;
     padding: 0.5rem 1rem;
@@ -73,7 +67,7 @@ nav a:hover {
     transition: background-color 0.3s;
 }
 
-.login-btn:hover {
+.loginBtn:hover {
     background-color: #00437a;
 }
 
@@ -89,7 +83,7 @@ nav a:hover {
 
 /* --- Sección Hero --- */
 .hero {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/src/img/rectoriaUDG.webp');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('../assets/rectoriaUDG.webp');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -108,7 +102,7 @@ nav a:hover {
 }
 
 /* --- Sección de Objetos --- */
-.items-section {
+.itemsSection {
     display: flex;
     gap: 2rem;
     padding: 2rem 5%;
@@ -127,7 +121,7 @@ nav a:hover {
     margin-bottom: 1.5rem;
 }
 
-.cards-container {
+.cardsContainer {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
@@ -148,11 +142,11 @@ nav a:hover {
     box-shadow: 0 6px 12px rgba(0,0,0,0.12);
 }
 
-.card.lost {
+.lost {
     border-left: 5px solid var(--lost-red);
 }
 
-.card.found {
+.found {
     border-left: 5px solid var(--udg-yellow);
 }
 
@@ -163,11 +157,11 @@ nav a:hover {
     background-color: #eee; /* Color de fondo para imágenes vacías */
 }
 
-.card-content {
+.cardContent {
     padding: 1rem;
 }
 
-.status-tag {
+.statusTag {
     color: white;
     padding: 0.2rem 0.6rem;
     border-radius: 4px;
@@ -177,11 +171,11 @@ nav a:hover {
     margin-bottom: 0.5rem;
 }
 
-.lost-tag {
+.lostTag {
     background-color: var(--lost-red);
 }
 
-.found-tag {
+.foundTag {
     background-color: var(--found-yellow);
 }
 
@@ -204,11 +198,11 @@ footer {
     margin-top: 2rem;
 }
 
-.footer-links {
+.footerLinks {
     margin-top: 0.5rem;
 }
 
-.footer-links a {
+.footerLinks a {
     color: white;
     margin: 0 0.5rem;
     text-decoration: none;
@@ -216,18 +210,18 @@ footer {
 
 /* --- Responsividad --- */
 @media (max-width: 992px) {
-    .items-section {
+    .itemsSection {
         flex-direction: column;
     }
 }
 
 @media (max-width: 768px) {
-    .header-container {
+    .headerContainer {
         flex-direction: column;
         gap: 1rem;
     }
     
-    .cards-container {
+    .cardsContainer {
         grid-template-columns: 1fr;
     }
     

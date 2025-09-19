@@ -1,12 +1,4 @@
-/* Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
+.wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -26,7 +18,7 @@ body {
   padding: 30px;
 }
 
-.card-header {
+.cardHeader {
   text-align: center;
 }
 
@@ -35,14 +27,20 @@ body {
   margin-bottom: 15px;
 }
 
-.card-header h2 {
+.cardHeader h2 {
   font-size: 22px;
   font-weight: bold;
   color: #0a1733;
 }
 
-.card-content {
+.cardContent {
   margin-top: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 form input {
@@ -66,16 +64,16 @@ form input {
   transition: 0.3s;
 }
 
-.main-btn {
+.mainBtn {
   background: #0f1a3a;
   color: #fff;
 }
 
-.main-btn:hover {
+.mainBtn:hover {
   background: #1a275a;
 }
 
-.google-btn {
+.googleBtn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -85,16 +83,16 @@ form input {
   color: #333;
 }
 
-.google-btn:hover {
+.googleBtn:hover {
   background: #f5f5f5;
 }
 
-.google-icon {
+.googleIcon {
   width: 20px;
   height: 20px;
 }
 
-.toggle-text {
+.toggleText {
   text-align: center;
   font-size: 14px;
   color: #555;
