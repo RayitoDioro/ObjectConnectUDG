@@ -1,0 +1,19 @@
+/* Estilos extraídos de home.module.css que pertenecen solo al Footer */
+.footer {
+  background-color: #343a40;
+  color: white;
+  text-align: center;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.footerLinks {
+  margin-top: 0.5rem;
+}
+
+.footerLinks a {
+  color: white;
+  margin: 0 0.5rem;
+  text-decoration: none;
+}
+

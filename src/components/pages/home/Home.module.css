@@ -1,0 +1,64 @@
+/* --- Sección Hero --- */
+.hero {
+  /* La ruta correcta a la imagen desde este archivo */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('../../../assets/rectoriaUDG.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin: 0.5rem 0;
+}
+
+.hero p {
+  font-size: 1.2rem;
+}
+
+/* --- Sección de Objetos --- */
+.itemsSection {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem 5%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.column {
+  flex: 1;
+}
+
+.column h2 {
+  color: #00569c; /* --udg-blue */
+  border-bottom: 2px solid #dee2e6; /* --border-color */
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cardsContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+/* --- Responsividad --- */
+@media (max-width: 992px) {
+  .itemsSection {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .cardsContainer {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero h1 {
+    font-size: 2rem;
+  }
+}
+

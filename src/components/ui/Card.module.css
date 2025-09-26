@@ -1,0 +1,64 @@
+/* Estilos extraídos de home.module.css para las tarjetas */
+.card {
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+}
+
+.lost {
+  border-left: 5px solid #d9534f;
+}
+
+.found {
+  border-left: 5px solid #ffb81c;
+}
+
+.card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  background-color: #eee; /* Color de fondo para imágenes vacías */
+}
+
+.cardContent {
+  padding: 1rem;
+  text-align: left;
+}
+
+.statusTag {
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.lostTag {
+  background-color: #d9534f;
+}
+
+.foundTag {
+  background-color: #f0ad4e;
+}
+
+.card h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.card .meta {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 0.2rem 0;
+}
+
