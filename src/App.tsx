@@ -13,7 +13,6 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* La ruta principal ahora usa MainLayout para envolver a Home */}
         <Route 
           path="/" 
           element={
@@ -22,7 +21,6 @@ function App() {
             </MainLayout>
           } 
         />
-        {/* La ruta de login no necesita el layout principal */}
         <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>
