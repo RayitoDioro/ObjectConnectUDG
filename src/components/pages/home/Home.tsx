@@ -1,12 +1,12 @@
 import { Box } from "@chakra-ui/react";
 import rectoriaUDG from '@/assets/rectoriaUDG.webp';
-import { useState, useEffect } from 'react';
 import PresentationSection from './subComponents/PresentationSection';
 import FilterSortControls from './subComponents/FilterSortControls';
 import ObjectGrid from "./subComponents/ObjectGrid";
 import { type CardProps } from "@/types";
+import { useObjectFilter } from "./hooks/useObjectFilter";
 
-const objetos: CardProps[] = [
+const objects: CardProps[] = [
   {
     id: 1,
     status: "lost",
@@ -118,42 +118,16 @@ const objetos: CardProps[] = [
 ];
 
 const Home = () => {
-  const [filteredObjects, setFilteredObjects] = useState(objetos);
-  const [searchObj, setSearchObj] = useState('');
-  const [sortBy, setSortBy] = useState('newest');
+  const {
+    searchObj,
+    setSearchObj,
+    sortBy,
+    setSortBy,
+    filteredObjects
+  } = useObjectFilter(objects); // Custom Hook para lógica de filtrado y ordenamiento
   
   const lostItems = filteredObjects.filter(obj => obj.status === 'lost');
-  const foundItems = filteredObjects.filter(obj => obj.status === 'found');  
-
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      // FILTRADO
-      let processedObjects;
-
-      if(searchObj === '') {
-        processedObjects = objetos;
-      } else {
-        const lowercasedFilter = searchObj.toLowerCase();
-        processedObjects = objetos.filter(obj => 
-          obj.title.toLowerCase().includes(lowercasedFilter) ||
-          obj.location.toLowerCase().includes(lowercasedFilter)
-        );
-      }
-
-      // ORDENAMIENTO
-      const sortedObjects = [...processedObjects];
-
-      if(sortBy === 'newest') {
-        sortedObjects.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      } else {
-        sortedObjects.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      }
-
-      setFilteredObjects(sortedObjects);      
-
-    }, 500);
-    return () => clearTimeout(debounceTimer);
-  }, [searchObj, sortBy]);
+  const foundItems = filteredObjects.filter(obj => obj.status === 'found');
 
   return(
     <Box>
