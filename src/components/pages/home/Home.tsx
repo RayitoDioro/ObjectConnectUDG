@@ -1,6 +1,6 @@
 import Card from '../../ui/Card'; // Usamos el nuevo componente Card
-import { Box, Text, Heading, Flex, SimpleGrid, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
-import { SearchIcon } from "@chakra-ui/icons";
+import { Box, Text, Heading, Flex, SimpleGrid, Input, InputGroup, InputLeftElement, Select, Stack, Button, useDisclosure, Collapse } from "@chakra-ui/react";
+import { SearchIcon, ArrowUpDownIcon } from "@chakra-ui/icons";
 import rectoriaUDG from '@/assets/rectoriaUDG.webp';
 import { useState, useEffect } from 'react';
 
@@ -18,7 +18,7 @@ const objetos: CardProps[] = [
   {
     id: 1,
     status: "lost",
-    imageUrl: "",
+    imageUrl: rectoriaUDG,
     altText: "Mochila Negra",
     title: "Mochila Negra en CUCEI",
     date: "15/May/2024",
@@ -128,24 +128,43 @@ const objetos: CardProps[] = [
 const Home = () => {
   const [searchObj, setSearchObj] = useState('');
   const [filteredObjects, setFilteredObjects] = useState(objetos);
-
+  const [sortBy, setSortBy] = useState('newest');
+  
   const lostItems = filteredObjects.filter(obj => obj.status === 'lost');
   const foundItems = filteredObjects.filter(obj => obj.status === 'found');
 
+  const { isOpen, onToggle } = useDisclosure()
+  
+
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
+      // FILTRADO
+      let processedObjects;
+
       if(searchObj === '') {
-        setFilteredObjects(objetos);
+        processedObjects = objetos;
       } else {
         const lowercasedFilter = searchObj.toLowerCase();
-        const newFilteredObjects = objetos.filter(obj => 
-          obj.title.toLowerCase().includes(lowercasedFilter)
+        processedObjects = objetos.filter(obj => 
+          obj.title.toLowerCase().includes(lowercasedFilter) ||
+          obj.location.toLowerCase().includes(lowercasedFilter)
         );
-        setFilteredObjects(newFilteredObjects);
       }
-    }, 600);
+
+      // ORDENAMIENTO
+      const sortedObjects = [...processedObjects];
+
+      if(sortBy === 'newest') {
+        sortedObjects.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      } else {
+        sortedObjects.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      }
+
+      setFilteredObjects(sortedObjects);      
+
+    }, 500);
     return () => clearTimeout(debounceTimer);
-  }, [searchObj]);
+  }, [searchObj, sortBy]);
 
   return(
     <Box>
@@ -163,38 +182,63 @@ const Home = () => {
         <Text mt={2}>Encuentra o reporta objetos perdidos en la comunidad universitaria.</Text>
       </Box>
 
-      {/* {Barra de búsqueda} */}
-      <Box
-        w={{ base: '95%', md: '700px' }} // 1. Limita el ancho del contenedor
-        mx="auto"                       // 2. CENTRA el contenedor en la página
-        my="6"                          // 3. Añade margen vertical para separarlo
-        p="3"                           // Padding para que el input no toque los bordes
-        bg="white"
-        borderRadius="lg"
-        shadow="2xl"
-      >
-        <InputGroup size={"lg"}>
-          <InputLeftElement pointerEvents="none">
-            <SearchIcon color="gray.500" />
-          </InputLeftElement>
-          <Input 
-            type="text" 
-            borderRadius={"md"} 
-            placeholder="Buscar objeto..."
-            value={searchObj}
-            onChange={(e) => setSearchObj(e.target.value)}
-          />
-        </InputGroup>
+      {/* Botón para mostrar barra y filtros */}
+      <Box textAlign='center' my='6'>
+        <Button 
+          color='brand.blueLight' 
+          borderColor='brand.blueLight' 
+          _hover={{ bg: 'brand.blueLight', color: 'white'}} 
+          variant='outline' 
+          leftIcon={<ArrowUpDownIcon/>} 
+          onClick={onToggle}
+        >
+          {isOpen ? 'Ocultar' : 'Buscar o Filtrar'}
+        </Button>
       </Box>
+
+      {/* Panel que contiene la barra de búsqueda y filtros */}
+      <Collapse in={isOpen} animateOpacity>
+          <Box
+            w={{ base: '95%', md: '900px'}}
+            mx='auto'
+            mb='4'
+            p='4'
+            bg='white'
+            shadow='md'
+          >
+            <Stack spacing={4}>
+              <InputGroup size="lg">
+                <InputLeftElement pointerEvents="none">
+                  <SearchIcon color="gray.500" />
+                </InputLeftElement>
+                <Input
+                  type="text"
+                  borderRadius="md"
+                  placeholder="Buscar por título o ubicación..."
+                  value={searchObj}
+                  onChange={(e) => setSearchObj(e.target.value)}
+                />
+              </InputGroup>
+
+              <Select 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="newest">Más nuevos primero</option>
+                <option value="oldest">Más antiguos primero</option>
+              </Select>
+            </Stack>
+          </Box>
+        </Collapse>
 
       {/* Objetos */}
       <Flex justify="space-around" p={10} wrap="wrap" gap={8}>
         {/* Perdidos */}      
         <Box flex="1" minW="300px">
-          <Heading textAlign={"center"} size="lg" mb={4} color={"#00569c"}>
+          <Heading textAlign={"center"} size="lg" mb={4} color={"brand.blueLight"}>
             OBJETOS PERDIDOS
           </Heading>
-          { //Mensajes según objetos pérdidos existentes/coincidentes
+          { //Mensajes según objetos perdidos existentes/coincidentes
             lostItems.length === 0 ? (
               searchObj ? (
                 <Text textAlign="center" mt="4" color="gray.500">
