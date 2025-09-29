@@ -15,7 +15,7 @@ const Header = () => {
           <ul>
             <li><Link to="/lost-objects">Objetos perdidos</Link></li>
             <li><Link to="/objetos-encontrados">Objetos encontrados</Link></li>
-            <li><a href="#">Publicar objeto</a></li>
+            <li><Link to="/publicar-objeto">Publicar objeto</Link></li>
           </ul>
         </nav>
         <div className={styles.headerRight}>
