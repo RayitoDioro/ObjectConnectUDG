@@ -8,6 +8,7 @@ import { MainLayout } from './layouts/MainLayout.tsx';
 // import Login from './pages/login/Login.tsx';
 import Home from './components/pages/home/Home.tsx'
 import Login from './components/pages/login/Login.tsx';
+import LostObjects from './components/pages/lostobjects/LostObjects.tsx';
 
 function App() {
   return (
@@ -21,6 +22,14 @@ function App() {
             </MainLayout>
           } 
         />
+        <Route
+          path="/lost-objects"
+          element={
+            <MainLayout>
+              <LostObjects />
+            </MainLayout>
+          }
+        />
         <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>
@@ -28,4 +37,3 @@ function App() {
 }
 
 export default App;
-

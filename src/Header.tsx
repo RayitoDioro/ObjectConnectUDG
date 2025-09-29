@@ -8,13 +8,17 @@ const Header = () => {
     <header className={styles.header}>
       <div className={styles.headerContainer}>
         <div className={styles.logo}>
-          <img src={udgLogo} alt="Logo Universidad de Guadalajara" />
+          <Link to="/">
+            <img src={udgLogo} alt="Logo Universidad de Guadalajara" />
+          </Link>
         </div>
         <nav>
           <ul>
+            {/* Usamos Link para la navegación interna de React */}
             <li><Link to="/lost-objects">Objetos perdidos</Link></li>
-            <li><a href="#">Objetos encontrados</a></li>
-            <li><a href="#">Publicar objeto</a></li>
+            {/* TODO: Crear y enlazar la página de objetos encontrados */}
+            <li><Link to="#">Objetos encontrados</Link></li>
+            <li><Link to="#">Publicar objeto</Link></li>
           </ul>
         </nav>
         <div className={styles.headerRight}>
@@ -28,4 +32,3 @@ const Header = () => {
 };
 
 export default Header;
-
