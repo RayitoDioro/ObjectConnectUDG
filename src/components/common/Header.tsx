@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import styles from './Header.module.css';
-// Corregimos la ruta a la imagen para que sea relativa al archivo actual.
 import udgLogo from '../../assets/logoUDG.png';
 
 const Header = () => {
@@ -8,12 +7,14 @@ const Header = () => {
     <header className={styles.header}>
       <div className={styles.headerContainer}>
         <div className={styles.logo}>
-          <img src={udgLogo} alt="Logo Universidad de Guadalajara" />
+          <Link to="/" className={styles.logo}>
+            <img src={udgLogo} alt="Logo Universidad de Guadalajara - Ir al inicio" />
+          </Link>
         </div>
         <nav>
           <ul>
             <li><Link to="/lost-objects">Objetos perdidos</Link></li>
-            <li><a href="#">Objetos encontrados</a></li>
+            <li><Link to="/objetos-encontrados">Objetos encontrados</Link></li>
             <li><a href="#">Publicar objeto</a></li>
           </ul>
         </nav>
@@ -28,4 +29,3 @@ const Header = () => {
 };
 
 export default Header;
-

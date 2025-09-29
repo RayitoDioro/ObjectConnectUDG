@@ -1,4 +1,3 @@
-/* Estilos extraídos de home.module.css para las tarjetas */
 .card {
   background-color: white;
   border: 1px solid #dee2e6;
@@ -25,7 +24,7 @@
   width: 100%;
   height: 150px;
   object-fit: cover;
-  background-color: #eee; /* Color de fondo para imágenes vacías */
+  background-color: #eee; 
 }
 
 .cardContent {

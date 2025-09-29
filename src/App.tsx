@@ -1,14 +1,11 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-// Corregimos las rutas para que sean relativas a la ubicación de App.tsx
-// y usamos la importación nombrada { MainLayout } con llaves.
-// Añadimos la extensión .tsx para ser más explícitos con el importador.
+// Layouts y paginas
 import { MainLayout } from './layouts/MainLayout.tsx';
-// import Home from './pages/home/Home.tsx';
-// import Login from './pages/login/Login.tsx';
 import Home from './components/pages/home/Home.tsx'
 import Login from './components/pages/login/Login.tsx';
 import LostObjects from './components/pages/lostobjects/LostObjects.tsx';
+import FoundObjects from './components/pages/foundobjects/foundobjects.tsx';
 
 function App() {
   return (
@@ -27,6 +24,15 @@ function App() {
           element={
             <MainLayout>
               <LostObjects />
+            </MainLayout>
+          }
+        />
+        {/*nueva ruta para objetos encontrados */}
+        <Route
+          path="/objetos-encontrados"
+          element={
+            <MainLayout>
+              <FoundObjects/>
             </MainLayout>
           }
         />
