@@ -4,8 +4,10 @@ const theme = extendTheme({
   colors: {
     brand: {
       blue: "#0b2c5d",   // azul institucional UDG
+      blueTwo: "#004e8eff",
       blueLight: "#00569c",
       yellow: "#f9b233", // dorado institucional UDG
+      yellowTwo: "#d6982eff", // dorado institucional UDG
     },
   },
   styles: {
