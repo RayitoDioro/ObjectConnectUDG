@@ -102,7 +102,6 @@ const Login = () => {
     };
 
     return (
-        // Wrapper - fondo azul y alineamiento de elementos
         <Flex
             align='center'
             justify='center'

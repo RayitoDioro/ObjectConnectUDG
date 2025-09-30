@@ -1,9 +1,6 @@
-/*
-  Forzamos un esquema de color claro para evitar que el navegador
-  aplique su propio modo oscuro por defecto.
-*/
+
 :root {
-  color-scheme: light; /* ¡Esto es clave para desactivar el modo oscuro automático! */
+  color-scheme: light; 
 }
 
 html, body, #root {
@@ -16,21 +13,20 @@ html, body, #root {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #f8f9fa; /* Usamos el gris claro de tu diseño original */
-  color: #333333; /* Texto oscuro por defecto para toda la página */
+  background-color: #f8f9fa; 
+  color: #333333; 
   line-height: 1.6;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Un reseteo simple para asegurar que todos los elementos se comporten igual */
 *, *::before, *::after {
   box-sizing: inherit;
 }
 
 a {
-  color: #00569c; /* Azul UDG para los links */
+  color: #00569c; 
   text-decoration: none;
 }
 

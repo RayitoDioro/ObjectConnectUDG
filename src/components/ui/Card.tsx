@@ -1,6 +1,5 @@
 import styles from './Card.module.css';
 
-// Creamos un tipo para las propiedades del componente para mayor claridad
 type CardProps = {
   status: 'lost' | 'found';
   imageUrl: string;
@@ -10,7 +9,6 @@ type CardProps = {
   location: string;
 };
 
-// Componente genérico para mostrar tarjetas de objetos
 const Card = ({ status, imageUrl, altText, title, date, location }: CardProps) => {
   const isLost = status === 'lost';
   const tagText = isLost ? '¡PERDIDO!' : '¡ENCONTRADO!';

@@ -34,13 +34,13 @@ const Header = () => {
 
         {/* Enlaces para navegar en computadora */}
         <HStack as='nav' spacing={8} display={{ base: 'none', md: 'flex'}}>
-          <Link as={RouterLink} to="/lost-items" fontWeight='bold' _hover={linkHoverStyle}>
+          <Link as={RouterLink} to="/lost-objects" fontWeight='bold' _hover={linkHoverStyle}>
             Objetos perdidos
           </Link>
-          <Link as={RouterLink} to="/found-items"  fontWeight='bold' _hover={linkHoverStyle}>
+          <Link as={RouterLink} to="/objetos-encontrados"  fontWeight='bold' _hover={linkHoverStyle}>
             Objetos encontrados
           </Link>
-          <Link as={RouterLink} to="/publish-item" fontWeight='bold' _hover={linkHoverStyle}>
+          <Link as={RouterLink} to="/publicar-objeto" fontWeight='bold' _hover={linkHoverStyle}>
             Publicar objeto
           </Link>
         </HStack>
@@ -148,4 +148,3 @@ const Header = () => {
 };
 
 export default Header;
-
