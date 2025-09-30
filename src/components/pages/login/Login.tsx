@@ -1,12 +1,104 @@
 import { useState } from "react";
-import { Box, Flex, Heading, Image, Input, Button, Text, VStack } from '@chakra-ui/react';
+import { Box, Flex, Heading, Image, Input, Button, Text, VStack, useToast } from '@chakra-ui/react';
 import udgLogo from '@/assets/leonUDG.png';
 import googleLogo from '@/assets/google_logo.svg';
+import { useNavigate } from "react-router-dom";
+import { supabaseClient } from "@/supabaseClient";
 
 const Login = () => {
     const [isLogin, setIsLogin] = useState(true);
+    const [loading, setLoading] = useState(false);
+
+    const [email, setEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [password, setPassword] = useState('');
+
     const toggleForm = () => {
         setIsLogin(!isLogin);
+    };
+
+    const navigate = useNavigate();
+    const toast = useToast();
+
+    // Lógica se inicio de sesión con contraseña
+    const handleAuth = async (event: React.FormEvent) => {
+        event.preventDefault();
+        setLoading(true);
+
+        try {
+            if(isLogin){
+                // Lógica para iniciar sesión
+                const {error} = await supabaseClient.auth.signInWithPassword({email, password});
+
+                if(error) {
+                    throw error;
+                }
+                navigate('/');
+            } else {
+                // Lógica para el registro
+                const {error} =  await supabaseClient.auth.signUp({
+                    email, 
+                    password,
+                    options: {
+                        data: {
+                            first_name: firstName,
+                            last_name: lastName
+                        }
+                    }
+                });
+
+                if(error) {
+                    throw error;
+                }
+
+                // Cuadro de diálogo que envía mensaje de éxito al usuario
+                toast({
+                    title: 'Cuenta creada con éxito.',
+                    description: 'Revisa tu bandeja de entrada para verificar tu cuenta.',
+                    status: 'success',
+                    'duration': 5000,
+                    isClosable: true
+                });
+            }
+
+        } catch(error: unknown) {
+            showAuthError(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Lógica se inicio de sesión con Google
+    const handleGoogleLogin = async () => {
+        setLoading(true);
+        try {
+            const {error} = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google'
+            });
+
+            if(error) throw error;
+        } catch(error: unknown) {
+            showAuthError(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Mensaje de error que se repite
+    const showAuthError = (error: unknown) => {
+        let errorMessage = 'Ocurrió un error desconocido';
+        if(typeof error === 'object' && error !== null) {
+            const err = error as {error_description?: string, message?: string};
+            errorMessage = err.error_description || err.message || errorMessage;
+        }
+        toast({
+            title: 'Error de autenticación',
+            description: errorMessage,
+            status: 'error',
+            duration: 5000,
+            isClosable: true
+        })
     };
 
     return (
@@ -31,14 +123,17 @@ const Login = () => {
 
                     {/* cardContainer */}
                     <Box mt='6'>
-                        <VStack as='form' spacing='4'>
-                            <Input type='email' placeholder="Correo electrónico" size='lg' required />
+                        <VStack as='form' spacing='4' onSubmit={handleAuth}>
+                            <Input type='email' placeholder="Correo electrónico" size='lg' required onChange={(e) => setEmail(e.target.value)} />
                             
                             {!isLogin && (
-                                <Input type='text' placeholder="Nombre completo" size='lg' />
+                                <>
+                                    <Input type='text' placeholder="Nombre" size='lg' onChange={(e) => setFirstName(e.target.value)} />
+                                    <Input type='text' placeholder="Apellido" size='lg' onChange={(e) => setLastName(e.target.value)} />
+                                </>
                             )}
 
-                            <Input type='password' placeholder="Contraseña" size='lg' required />
+                            <Input type='password' placeholder="Contraseña" size='lg' required onChange={(e) => setPassword(e.target.value)} />
 
                             {/* Botón para inicio de sesión o registro por contraseña */}
                             <Button
@@ -48,6 +143,8 @@ const Login = () => {
                                 color='white'
                                 size='lg'
                                 _hover={{ bg: 'brand.blueLight'}}
+                                isLoading={loading}
+                                loadingText={isLogin ? 'Iniciando' : 'Registrando...'}
                             >
                                 {isLogin ? 'Iniciar sesión' : 'Registrarme'}
                             </Button>   
@@ -61,6 +158,8 @@ const Login = () => {
                             size='lg'
                             leftIcon={<Image src={googleLogo} alt='Google' boxSize='20px' />}
                             _hover={{ bg: 'gray.200'}}
+                            onClick={handleGoogleLogin}
+                            isLoading={loading}
                         >
                             {isLogin ? 'Iniciar con Google' : 'Registrase con Google'}
                         </Button>

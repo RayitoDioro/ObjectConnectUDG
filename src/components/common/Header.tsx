@@ -7,7 +7,7 @@ import { Box, Flex, Image, Button, MenuButton, Menu, MenuList, MenuItem, Avatar,
 import { HamburgerIcon } from '@chakra-ui/icons';
 
 const Header = () => {
-  const { session } = useAuth();
+  const { session, profile } = useAuth();
   const navigate = useNavigate();
 
   // Hook 
@@ -52,10 +52,19 @@ const Header = () => {
               session ? (
                 <Menu>
                   <MenuButton as={Button} rounded='full' variant='link' cursor='pointer' >
-                    <Avatar size='md' bg='brand.yellow' color='brand.blue' name={session.user.email}></Avatar>
+                    <Avatar 
+                      size='md'
+                      bg='brand.yellow'
+                      color='brand.blue'
+                      src={profile?.photo_profile_url || session?.user?.user_metadata?.avatar_url || ''}
+                      name={profile ? `${profile.first_name} ${profile.last_name}` : (session?.user?.user_metadata?.full_name || session?.user?.email)}
+                      referrerPolicy="no-referrer"
+                    />
                   </MenuButton>
                   <MenuList>
-                    <MenuItem color='black' fontWeight='black'>{session.user.email}</MenuItem>
+                    <MenuItem color='black' fontWeight='black'>
+                      {profile ? `${profile.first_name} ${profile.last_name}` : (session?.user?.user_metadata?.full_name || session?.user?.email)}
+                    </MenuItem>
                     <MenuItem color='black' fontWeight='bold'>Mi perfil</MenuItem>
                     <MenuItem color='red.500' fontWeight='bold' onClick={handleLogout}>
                       Cerrar sesión
