@@ -5,10 +5,13 @@ const theme = extendTheme({
   colors: {
     // 1. Fusionamos todos los colores en el mismo objeto 'brand'
     brand: {
+
       // --- Tus colores institucionales originales ---
-      blue: "#0b2c5d",       // azul institucional UDG
+      blue: "#0b2c5d",   // azul institucional UDG
+      blueTwo: "#004e8eff",
       blueLight: "#00569c",
-      yellow: "#f9b233",     // dorado institucional UDG
+      yellow: "#f9b233", // dorado institucional UDG
+      yellowTwo: "#d6982eff", // dorado institucional UDG
 
       // --- Nuevos colores para el formulario ---
       primary: "#0A1C3B",     // --primary-blue
