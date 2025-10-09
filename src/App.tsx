@@ -8,43 +8,30 @@ import LostObjects from './components/pages/lostobjects/LostObjects.tsx';
 import FoundObjects from './components/pages/foundobjects/foundobjects.tsx';
 import PublishObject from './components/pages/publishobject/PublishObject.tsx'; // 1. Importamos el nuevo componente
 import { AuthProvider } from './context/AuthContext.tsx';
+import { ProtectedRoute } from './components/common/ProtectedRoute.tsx';
 
 function App() {
+  // Elimina el useAuth aquí, solo usa el Provider
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route 
-            path="/" 
-            element={
-              <MainLayout>
-                <Home />
-              </MainLayout>
-            } 
-          />
+          <Route path="/" element={<MainLayout> <Home /> </MainLayout>} />
           <Route
-            path="/lost-objects"
+            path="/objetos-perdidos"
             element={
-              <MainLayout>
-                <LostObjects />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout><LostObjects /></MainLayout>
+              </ProtectedRoute>
             }
           />
-          <Route
-            path="/objetos-encontrados"
-            element={
-              <MainLayout>
-                <FoundObjects/>
-              </MainLayout>
-            }
-          />
-          {/* publicar objetos */}
+          <Route path="/objetos-encontrados" element={<MainLayout> <FoundObjects/> </MainLayout>} />
           <Route
             path="/publicar-objeto"
             element={
-              <MainLayout>
-                <PublishObject />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout><PublishObject /></MainLayout>
+              </ProtectedRoute>
             }
           />
           <Route path="/login" element={<Login />} />

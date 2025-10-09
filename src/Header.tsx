@@ -15,7 +15,7 @@ const Header = () => {
         <nav>
           <ul>
             {/* Usamos Link para la navegación interna de React */}
-            <li><Link to="/lost-objects">Objetos perdidos</Link></li>
+            <li><Link to="/objetos-perdidos">Objetos perdidos</Link></li>
             {/* TODO: Crear y enlazar la página de objetos encontrados */}
             <li><Link to="#">Objetos encontrados</Link></li>
             <li><Link to="#">Publicar objeto</Link></li>

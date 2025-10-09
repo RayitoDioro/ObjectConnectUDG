@@ -34,7 +34,7 @@ const Header = () => {
 
         {/* Enlaces para navegar en computadora */}
         <HStack as='nav' spacing={8} display={{ base: 'none', md: 'flex'}}>
-          <Link as={RouterLink} to="/lost-objects" fontWeight='bold' _hover={linkHoverStyle}>
+          <Link as={RouterLink} to="/objetos-perdidos" fontWeight='bold' _hover={linkHoverStyle}>
             Objetos perdidos
           </Link>
           <Link as={RouterLink} to="/objetos-encontrados"  fontWeight='bold' _hover={linkHoverStyle}>
