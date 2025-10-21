@@ -43,6 +43,11 @@ const Header = () => {
           <Link as={RouterLink} to="/publicar-objeto" fontWeight='bold' _hover={linkHoverStyle}>
             Publicar objeto
           </Link>
+          {session && (
+            <Link as={RouterLink} to="/Chats" fontWeight='bold' _hover={linkHoverStyle}>
+              Chats
+            </Link>
+          )}
         </HStack>
         
         <HStack>
@@ -103,6 +108,7 @@ const Header = () => {
               <Link as={RouterLink} to='/lost-items' onClick={onDrawerClose} fontSize='lg' _hover={linkHoverStyle}>Objetos perdidos</Link>
               <Link as={RouterLink} to='/found-items' onClick={onDrawerClose} fontSize='lg' _hover={linkHoverStyle}>Objetos encontrados</Link>
               <Link as={RouterLink} to='/publish-items' onClick={onDrawerClose} fontSize='lg' _hover={linkHoverStyle}>Publicar objetos</Link>
+              {session && (<Link as={RouterLink} to='/Chats' onClick={onDrawerClose} fontSize='lg' _hover={linkHoverStyle}>Chats</Link>)}
 
               <Divider/>
 

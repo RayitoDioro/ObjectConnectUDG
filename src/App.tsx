@@ -9,6 +9,7 @@ import FoundObjects from './components/pages/foundobjects/foundobjects.tsx';
 import PublishObject from './components/pages/publishobject/PublishObject.tsx'; // 1. Importamos el nuevo componente
 import { AuthProvider } from './context/AuthContext.tsx';
 import { ProtectedRoute } from './components/common/ProtectedRoute.tsx';
+import Chats from './components/pages/chats/Chats.tsx';
 
 function App() {
   // Elimina el useAuth aquí, solo usa el Provider
@@ -31,6 +32,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <MainLayout><PublishObject /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chats"
+            element={
+              <ProtectedRoute>
+                <MainLayout><Chats /></MainLayout>
               </ProtectedRoute>
             }
           />

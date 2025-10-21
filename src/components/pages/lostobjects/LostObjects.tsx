@@ -25,10 +25,17 @@ import { useLostObjects } from './hooks/useLostObjects';
 import { users } from './data/users'; // Importamos los datos de los usuarios
 import type { FullCardProps } from '../../../types'; // Corregido para que apunte a la ruta correcta
 import { ObjectList } from './subComponents/ObjectList';
+import { useAuth } from '@/context/AuthContext';
+import { useSchemas } from './hooks/useSchemas';
+import { useNavigate } from 'react-router-dom';
 
 
 
 export default function LostObjects() {
+    const { profile } = useAuth();
+    const navigate = useNavigate();
+    const { createThreaForPost, threads } = useSchemas()
+    console.log("Threads actualizados:", threads)
     const { lostObjects, possibleMatches, getPossibleMatches } = useLostObjects();
 
     // Estado para guardar el objeto seleccionado y mostrar sus detalles
@@ -60,6 +67,14 @@ export default function LostObjects() {
         setFeaturesFilter('');
         getPossibleMatches('', ''); // Call with empty strings to clear the matches
         setIsTargetSet(false);
+    }
+
+    const handleCreateChatWithUser = (finderId: string, postId: number, objectOwnerId: string) => {
+        // Lógica para crear un chat con el usuario dado su ID
+        console.log(lostObjects)
+        console.log(`Creating chat with user ID: ${finderId} on post ID: ${postId} from object owner ID: ${objectOwnerId}`);
+        createThreaForPost(finderId, postId, objectOwnerId);
+        navigate('/chats');
     }
 
     return (
@@ -179,7 +194,13 @@ export default function LostObjects() {
                                         {/* 5. Acciones de Contacto */}
                                         {user && (
                                             <VStack spacing={2} align="stretch" pt={4}>
-                                                <Button colorScheme="brand" bg="brand.blueLight" color="white" _hover={{ bg: 'brand.blue' }}>
+                                                <Button 
+                                                colorScheme="brand" 
+                                                bg="brand.blueLight" 
+                                                color="white" 
+                                                _hover={{ bg: 'brand.blue' }}
+                                                onClick={() => handleCreateChatWithUser(user.id, selectedObject.id, profile!.user_id)}
+                                                >
                                                     Crear chat con {user.fullName}
                                                 </Button>
                                                 <Text textAlign="center" fontSize="xs" color="gray.500">

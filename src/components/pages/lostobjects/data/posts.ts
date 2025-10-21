@@ -1,6 +1,6 @@
-import type { FullCardProps } from "@/types";
+import type { PostProps } from "./types";
 
-export const lostobjects: FullCardProps[] = [
+export const lostObjects: PostProps[] = [
   {
     id: 1,
     status: "lost",
@@ -10,7 +10,8 @@ export const lostobjects: FullCardProps[] = [
     date: "15/May/2024",
     location: "Edificio A",
     userId: "adsdasdasd564asd",
-    description: "Fea mochila negra marca Amaz con composura en la derecha"
+    description: "Fea mochila negra marca Amaz con composura en la derecha",
+    thread: ""
   },
   {
     id: 2,
@@ -19,9 +20,10 @@ export const lostobjects: FullCardProps[] = [
     altText: "Celular Samsung Blanco",
     title: "Celular Samsung Blanco",
     date: "15/May/2024",
-    location: "Edificio A",
+    location: "Edificio B",
     userId: "adsdasdasd564asd",
-    description: "Celular Samsung Blanco A5 con cristal roto"
+    description: "Celular Samsung Blanco A5 con cristal roto",
+    thread: ""
   },
   {
     id: 3,
@@ -30,8 +32,9 @@ export const lostobjects: FullCardProps[] = [
     altText: "Topper Transparente Tapa Verde Agua",
     title: "Topper Transparente Tapa Verde Agua",
     date: "13/May/2023",
-    location: "Edificio A",
+    location: "Edificio C",
     userId: "ghjghj54ghjghj",
-    description: "Topper Transparente Tapa Verde Agua un poco desgastado con tapa medio rota"
+    description: "Topper Transparente Tapa Verde Agua un poco desgastado con tapa medio rota",
+    thread: ""
   },
 ];

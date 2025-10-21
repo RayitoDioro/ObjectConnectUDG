@@ -1,21 +1,23 @@
-import { useState } from "react"
-import { lostobjects as allObjects } from "../data/lostobjects"; // Renamed for clarity
+import { useState } from "react"// Renamed for clarity
 import type { FullCardProps } from "@/types"
+import { useSchemas } from "./useSchemas"
 
 export const useLostObjects = () => {
 
-    const [lostObjects, setLostObjects] = useState<FullCardProps[]>(allObjects)
+    const { posts } = useSchemas()
+
+    const [lostObjects, setLostObjects] = useState<FullCardProps[]>(posts)
     const [possibleMatches, setPossibleMatches] = useState<FullCardProps[]>([])
     const [filteredObjects, setFilteredObjects] = useState<FullCardProps[]>([])
 
     const filterObjectsByTerm = (term: string) => {
         if (!term) {
-            setLostObjects(allObjects); // If there is no term, display all objects
+            setLostObjects(lostObjects); // If there is no term, display all objects
             return;
         }
 
         const lowercasedTerm = term.toLowerCase();
-        const filtered = allObjects.filter(object =>
+        const filtered = lostObjects.filter(object =>
             object.title.toLowerCase().includes(lowercasedTerm) ||
             object.location.toLowerCase().includes(lowercasedTerm)
         );
@@ -38,7 +40,7 @@ export const useLostObjects = () => {
         }
 
         // 2. We filter the objects to find matches.
-        const matches = allObjects.filter(object => {
+        const matches = lostObjects.filter(object => {
             const objectWords = new Set(
                 `${object.title} ${object.description}`.toLowerCase().replace(/,/g, '').split(' ')
             );
