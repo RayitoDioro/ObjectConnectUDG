@@ -19,19 +19,70 @@ import {
   CloseButton, // Importamos un botón de cierre
 } from "@chakra-ui/react";
 import { AttachmentIcon, CalendarIcon } from "@chakra-ui/icons";
-import { useState, useRef } from "react"; // 1. Importamos useState y useRef
+import { useState, useRef } from "react";
+import { useAuth } from '../../../context/AuthContext';
+import { useSchemas, type PostPayload } from '../../../hooks/useSchemas';
 
 const PublishObject = () => {
   // 2. Estado para guardar los archivos seleccionados
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   // 3. Referencia para el input de archivo oculto
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // <-- estado de envío
+
+  const { session } = useAuth(); // obtener sesión (user id)
+  const { uploadPostWithImage } = useSchemas(); // <-- uso del custom hook
 
   // 4. Función que se ejecuta cuando el usuario selecciona archivos
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       // Convertimos el FileList a un Array y lo guardamos en el estado
       setSelectedFiles(Array.from(event.target.files));
+    }
+  };
+
+  // submit del formulario
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!session) {
+      console.warn('No hay sesión activa.');
+      return;
+    }
+
+    const userId = session.user.id;
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    const data: PostPayload = {
+      title: String(formData.get('title') || ''),
+      description: String(formData.get('description') || ''),
+      category: String(formData.get('category') || ''),
+      foundWhere: String(formData.get('foundWhere') || '') || undefined,
+      deliveredWhere: String(formData.get('deliveredWhere') || '') || undefined,
+      dateFound: String(formData.get('dateFound') || '') || null,
+      email: String(formData.get('email') || '') || undefined,
+    };
+
+    console.log('Publicar objeto - userId:', userId);
+    console.log('Datos del formulario:', data);
+    console.log('Archivos seleccionados:', selectedFiles);
+
+    setIsSubmitting(true);
+    try {
+      // subir la primera imagen (si existe) y crear el post
+      const fileToUpload = selectedFiles[0];
+      const created = await uploadPostWithImage(userId, data, fileToUpload);
+      console.log('Post creado:', created);
+
+      // limpiar estado y formulario
+      setSelectedFiles([]);
+      form.reset();
+    } catch (error) {
+      console.error('Error creando post:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -72,7 +123,8 @@ const PublishObject = () => {
       </Flex>
       
       <Box p={{ base: 6, md: 10 }}>
-        <VStack as="form" spacing={8} align="stretch">
+        {/* Agregar onSubmit al formulario */}
+        <VStack as="form" spacing={8} align="stretch" onSubmit={handleSubmit}>
           <Box>
             <Heading as="h2" size="lg" fontFamily="Montserrat" color="brand.primary" pb={2} borderBottom="2px solid" borderColor="brand.lightGray">
               Información Principal
@@ -81,11 +133,11 @@ const PublishObject = () => {
               {/* ... (resto de los FormControl no cambian) ... */}
               <FormControl isRequired>
                 <FormLabel fontWeight="600">Título del Reporte</FormLabel>
-                <Input placeholder="Ej. Mochila negra en Biblioteca" />
+                <Input name="title" placeholder="Ej. Mochila negra en Biblioteca" />
               </FormControl>
               <FormControl isRequired>
                 <FormLabel fontWeight="600">Descripción Detallada</FormLabel>
-                <Textarea placeholder="Marca, color, contenido especial, señas particulares..." minH="100px" />
+                <Textarea name="description" placeholder="Marca, color, contenido especial, señas particulares..." minH="100px" />
               </FormControl>
             </VStack>
           </Box>
@@ -98,7 +150,7 @@ const PublishObject = () => {
               {/* ... (resto de los FormControl no cambian) ... */}
               <FormControl>
                 <FormLabel fontWeight="600">Categoría</FormLabel>
-                <Select>
+                <Select name="category">
                   <option>Electrónicos</option>
                   <option>Libros y Libretas</option>
                   <option>Credenciales</option>
@@ -108,16 +160,16 @@ const PublishObject = () => {
               </FormControl>
               <FormControl isRequired>
                 <FormLabel fontWeight="600">¿Dónde lo encontraste?</FormLabel>
-                <Input placeholder="Ej. CUCEI, Edificio G, Aula 205" />
+                <Input name="foundWhere" placeholder="Ej. CUCEI, Edificio G, Aula 205" />
               </FormControl>
               <FormControl isRequired>
                 <FormLabel fontWeight="600">¿Dónde lo entregaste?</FormLabel>
-                <Input placeholder="Ej. Control Escolar, taquilla de la biblioteca..." />
+                <Input name="deliveredWhere" placeholder="Ej. Control Escolar, taquilla de la biblioteca..." />
               </FormControl>
               <FormControl isRequired>
                 <FormLabel fontWeight="600">Fecha en que lo encontraste</FormLabel>
                 <InputGroup>
-                  <Input type="date" />
+                  <Input name="dateFound" type="date" />
                   <InputRightElement pointerEvents="none">
                     <CalendarIcon color="gray.400" />
                   </InputRightElement>
@@ -162,6 +214,7 @@ const PublishObject = () => {
                 <AttachmentIcon w={10} h={10} color="gray.500" />
                 <Text>Arrastra tus fotos aquí o haz click para seleccionarlas</Text>
                 <Input 
+                  name="photos"
                   type="file" 
                   multiple 
                   accept="image/*" 
@@ -175,7 +228,7 @@ const PublishObject = () => {
           
           <Box>
             <FormControl isRequired>
-              <Input type="email" placeholder="tucorreo@alumnos.udg.mx" />
+              <Input name="email" type="email" placeholder="tucorreo@alumnos.udg.mx" />
             </FormControl>
             <Text fontSize="sm" color="gray.600" mt={2}>
               *Tu correo institucional (@alumnos.udg.mx) será visible para el dueño. No será visible públicamente.
@@ -183,8 +236,14 @@ const PublishObject = () => {
           </Box>
 
           <HStack justify="flex-end" spacing={4} pt={6} borderTop="2px solid" borderColor="brand.lightGray">
-            <Button variant="outline">Cancelar</Button>
-            <Button bg="brand.primary" color="white" _hover={{ bg: 'brand.secondary' }} type="submit">
+            <Button variant="outline" type="button">Cancelar</Button>
+            <Button
+              bg="brand.primary"
+              color="white"
+              _hover={{ bg: 'brand.secondary' }}
+              type="submit"
+              isLoading={isSubmitting}
+            >
               PUBLICAR OBJETO ENCONTRADO
             </Button>
           </HStack>
