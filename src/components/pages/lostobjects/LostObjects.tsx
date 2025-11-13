@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box,
     Grid,
@@ -22,11 +22,11 @@ import {
     Link as ChakraLink
 } from '@chakra-ui/react';
 import { useLostObjects } from './hooks/useLostObjects';
-import { users } from './data/users'; // Importamos los datos de los usuarios
 import type { FullCardProps } from '../../../types'; // Corregido para que apunte a la ruta correcta
 import { ObjectList } from './subComponents/ObjectList';
 import { useAuth } from '@/context/AuthContext';
-import { useSchemas } from './hooks/useSchemas';
+import { useSchemas as useLostObjectPageSchemas } from './hooks/useSchemas';
+import { useSchemas } from '@/hooks/useSchemas';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -34,14 +34,33 @@ import { useNavigate } from 'react-router-dom';
 export default function LostObjects() {
     const { profile } = useAuth();
     const navigate = useNavigate();
-    const { createThreaForPost, threads } = useSchemas()
-    console.log("Threads actualizados:", threads)
+    const { createThreaForPost, threads } = useLostObjectPageSchemas();
+    const { getUserById } = useSchemas();
     const { lostObjects, possibleMatches, getPossibleMatches } = useLostObjects();
 
     // Estado para guardar el objeto seleccionado y mostrar sus detalles
     const [selectedObject, setSelectedObject] = useState<FullCardProps | null>(
         lostObjects[0] ?? null
     );
+    const [selectedPostUser, setSelectedPostUser] = useState<any | null>(null);
+
+    useEffect(() => {
+        if (selectedObject?.userId) {
+            const fetchUser = async () => {
+                try {
+                    const user = await getUserById(selectedObject.userId);
+                    setSelectedPostUser(user);
+                    console.log(user)
+                } catch (error) {
+                    console.error("Error fetching user:", error);
+                    setSelectedPostUser(null);
+                }
+            };
+            fetchUser();
+        } else {
+            setSelectedPostUser(null);
+        }
+    }, [selectedObject, getUserById]);
 
     // Estado para los filtros (aún no implementada la lógica de filtrado)
     const [titleFilter, setTitleFilter] = useState('');
@@ -161,56 +180,48 @@ export default function LostObjects() {
                     <DrawerHeader>Más información</DrawerHeader>
                     <DrawerBody>
                         {selectedObject ? (
-                            (() => {
-                                const user = users.find(u => u.id === selectedObject.userId);
-                                return (
-                                    <VStack spacing={5} align="stretch">
-                                        {/* 1. Información del usuario y metadata */}
-                                        {user && (
-                                            <Flex justify="space-between" align="center">
-                                                <Flex align="center">
-                                                    <Avatar size="sm" src={user.photoUrl} name={user.fullName} />
-                                                    <Text ml={3} fontWeight="bold" color="gray.700">{user.fullName}</Text>
-                                                </Flex> 
-                                                <Text fontSize="xs" color="gray.500" textAlign="right">
-                                                    {selectedObject.date},<br />{selectedObject.location}
-                                                </Text>
-                                            </Flex>
-                                        )}
+                            <VStack spacing={5} align="stretch">
+                                {/* 1. Información del usuario y metadata */}
+                                {selectedPostUser && (
+                                    <Flex justify="space-between" align="center">
+                                        <Flex align="center">
+                                            <Avatar size="sm" src={selectedPostUser.photo_profile_url} name={`${selectedPostUser.first_name} ${selectedPostUser.last_name}`} />
+                                            <Text ml={3} fontWeight="bold" color="gray.700">{`${selectedPostUser.first_name} ${selectedPostUser.last_name}`}</Text>
+                                        </Flex>
+                                        <Text fontSize="xs" color="gray.500" textAlign="right">
+                                            {selectedObject.date},<br />{selectedObject.location}
+                                        </Text>
+                                    </Flex>
+                                )}
 
-                                        {/* 2. Título del objeto */}
-                                        <Heading as="h2" size="lg" color="brand.blue">
-                                            {selectedObject.title}
-                                        </Heading>
+                                {/* 2. Título del objeto */}
+                                <Heading as="h2" size="lg" color="brand.blue">
+                                    {selectedObject.title}
+                                </Heading>
 
-                                        {/* 3. Imagen del objeto */}
-                                        <Image src={selectedObject.imageUrl} alt={selectedObject.altText} borderRadius="md" maxH="300px" w="100%" objectFit="contain" bg="gray.100" /> 
+                                {/* 3. Imagen del objeto */}
+                                <Image src={selectedObject.imageUrl} alt={selectedObject.altText} borderRadius="md" maxH="300px" w="100%" objectFit="contain" bg="gray.100" />
 
-                                        <Divider />
+                                <Divider />
 
-                                        {/* 4. Descripción */}
-                                        <Text>{selectedObject.description}</Text>
+                                {/* 4. Descripción */}
+                                <Text>{selectedObject.description}</Text>
 
-                                        {/* 5. Acciones de Contacto */}
-                                        {user && (
-                                            <VStack spacing={2} align="stretch" pt={4}>
-                                                <Button 
-                                                colorScheme="brand" 
-                                                bg="brand.blueLight" 
-                                                color="white" 
-                                                _hover={{ bg: 'brand.blue' }}
-                                                onClick={() => handleCreateChatWithUser(user.id, selectedObject.id, profile!.user_id)}
-                                                >
-                                                    Crear chat con {user.fullName}
-                                                </Button>
-                                                <Text textAlign="center" fontSize="xs" color="gray.500">
-                                                    o envíale un correo a <ChakraLink href={`mailto:${user.email}`} isExternal color="brand.blue">{user.email}</ChakraLink>
-                                                </Text>
-                                            </VStack>
-                                        )}
+                                {/* 5. Acciones de Contacto */}
+                                {selectedPostUser && (
+                                    <VStack spacing={2} align="stretch" pt={4}>
+                                        <Button
+                                            colorScheme="brand"
+                                            bg="brand.blueLight"
+                                            color="white"
+                                            _hover={{ bg: 'brand.blue' }}
+                                            onClick={() => handleCreateChatWithUser(selectedPostUser.user_id, selectedObject.id, profile!.user_id)}
+                                        >
+                                            {`Crear chat con ${selectedPostUser.first_name} ${selectedPostUser.last_name}`}
+                                        </Button>
                                     </VStack>
-                                );
-                            })()
+                                )}
+                            </VStack>
                         ) : (
                             <Flex align="center" justify="center" h="100%">
                                 <Text color="gray.500">Selecciona un objeto para ver los detalles.</Text>
