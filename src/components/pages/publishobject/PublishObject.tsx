@@ -4,6 +4,7 @@ import {
   Container, 
   Flex, 
   FormControl, 
+  FormErrorMessage,
   FormLabel, 
   Heading, 
   HStack, 
@@ -28,6 +29,7 @@ const PublishObject = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   // 3. Referencia para el input de archivo oculto
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false); // <-- estado de envío
 
   const { session } = useAuth(); // obtener sesión (user id)
@@ -44,6 +46,7 @@ const PublishObject = () => {
   // submit del formulario
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrors({}); // Limpiar errores previos
 
     if (!session) {
       console.warn('No hay sesión activa.');
@@ -60,10 +63,31 @@ const PublishObject = () => {
       description: String(formData.get('description') || ''),
       category: String(formData.get('category') || ''),
       foundWhere: String(formData.get('foundWhere') || '') || undefined,
-      deliveredWhere: String(formData.get('deliveredWhere') || '') || undefined,
       dateFound: String(formData.get('dateFound') || '') || null,
-      email: String(formData.get('email') || '') || undefined,
     };
+
+    // Validaciones
+    const newErrors: Record<string, string> = {};
+    if (!data.title) newErrors.title = "El título es obligatorio.";
+    if (!data.description) newErrors.description = "La descripción es obligatoria.";
+    if (!data.foundWhere) newErrors.foundWhere = "El lugar donde lo encontraste es obligatorio.";
+    if (!data.dateFound) {
+      newErrors.dateFound = "La fecha es obligatoria.";
+    } else {
+      const year = new Date(data.dateFound).getFullYear();
+      if (year < 2025) {
+        newErrors.dateFound = "La fecha debe ser del año 2025 en adelante.";
+      }
+    }
+    if (selectedFiles.length === 0) {
+      newErrors.photos = "Debes subir al menos una foto.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
 
     console.log('Publicar objeto - userId:', userId);
     console.log('Datos del formulario:', data);
@@ -131,13 +155,15 @@ const PublishObject = () => {
             </Heading>
             <VStack spacing={5} mt={6}>
               {/* ... (resto de los FormControl no cambian) ... */}
-              <FormControl isRequired>
+              <FormControl isRequired isInvalid={!!errors.title}>
                 <FormLabel fontWeight="600">Título del Reporte</FormLabel>
                 <Input name="title" placeholder="Ej. Mochila negra en Biblioteca" />
+                {errors.title && <FormErrorMessage>{errors.title}</FormErrorMessage>}
               </FormControl>
-              <FormControl isRequired>
+              <FormControl isRequired isInvalid={!!errors.description}>
                 <FormLabel fontWeight="600">Descripción Detallada</FormLabel>
                 <Textarea name="description" placeholder="Marca, color, contenido especial, señas particulares..." minH="100px" />
+                {errors.description && <FormErrorMessage>{errors.description}</FormErrorMessage>}
               </FormControl>
             </VStack>
           </Box>
@@ -158,15 +184,13 @@ const PublishObject = () => {
                   <option>Otros</option>
                 </Select>
               </FormControl>
-              <FormControl isRequired>
+              <FormControl isRequired isInvalid={!!errors.foundWhere}>
                 <FormLabel fontWeight="600">¿Dónde lo encontraste?</FormLabel>
                 <Input name="foundWhere" placeholder="Ej. CUCEI, Edificio G, Aula 205" />
+                {errors.foundWhere && <FormErrorMessage>{errors.foundWhere}</FormErrorMessage>}
               </FormControl>
-              <FormControl isRequired>
-                <FormLabel fontWeight="600">¿Dónde lo entregaste?</FormLabel>
-                <Input name="deliveredWhere" placeholder="Ej. Control Escolar, taquilla de la biblioteca..." />
-              </FormControl>
-              <FormControl isRequired>
+
+              <FormControl isRequired isInvalid={!!errors.dateFound}>
                 <FormLabel fontWeight="600">Fecha en que lo encontraste</FormLabel>
                 <InputGroup>
                   <Input name="dateFound" type="date" />
@@ -174,6 +198,7 @@ const PublishObject = () => {
                     <CalendarIcon color="gray.400" />
                   </InputRightElement>
                 </InputGroup>
+                {errors.dateFound && <FormErrorMessage>{errors.dateFound}</FormErrorMessage>}
               </FormControl>
             </SimpleGrid>
           </Box>
@@ -182,6 +207,7 @@ const PublishObject = () => {
             <Heading as="h2" size="lg" fontFamily="Montserrat" color="brand.primary" pb={2} borderBottom="2px solid" borderColor="brand.lightGray">
               Sube una Fotografía
             </Heading>
+            {errors.photos && <Text color="red.500" mt={2}>{errors.photos}</Text>}
 
             {/* 6. Lógica condicional: Muestra la vista previa si hay archivos, o la caja de carga si no los hay. */}
             {selectedFiles.length > 0 ? (
@@ -226,14 +252,7 @@ const PublishObject = () => {
             )}
           </Box>
           
-          <Box>
-            <FormControl isRequired>
-              <Input name="email" type="email" placeholder="tucorreo@alumnos.udg.mx" />
-            </FormControl>
-            <Text fontSize="sm" color="gray.600" mt={2}>
-              *Tu correo institucional (@alumnos.udg.mx) será visible para el dueño. No será visible públicamente.
-            </Text>
-          </Box>
+
 
           <HStack justify="flex-end" spacing={4} pt={6} borderTop="2px solid" borderColor="brand.lightGray">
             <Button variant="outline" type="button">Cancelar</Button>

@@ -4,9 +4,7 @@ export type PostPayload = {
     title: string;
     description: string;
     foundWhere?: string;
-    deliveredWhere?: string;
     dateFound?: string | null;
-    email?: string;
     category?: string;
 };
 
@@ -51,7 +49,7 @@ export function useSchemas() {
             const insertPayload = {
                 title: payload.title,
                 description: payload.description,
-                location: payload.foundWhere ?? payload.deliveredWhere ?? null,
+                location: payload.foundWhere ?? null,
                 photo_url: publicUrl,
                 user_id: userId,
                 post_state_id: 1,
