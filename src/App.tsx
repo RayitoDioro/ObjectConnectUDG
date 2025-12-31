@@ -37,7 +37,7 @@ function App() {
             }
           />
           <Route
-            path="/chats"
+            path="/chats/:threadId?"
             element={
               <ProtectedRoute>
                 <MainLayout><Chats /></MainLayout>
