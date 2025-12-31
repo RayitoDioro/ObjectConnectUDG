@@ -70,7 +70,7 @@ const Header = () => {
                     <MenuItem color='black' fontWeight='black'>
                       {profile ? `${profile.first_name} ${profile.last_name}` : (session?.user?.user_metadata?.full_name || session?.user?.email)}
                     </MenuItem>
-                    <MenuItem color='black' fontWeight='bold'>Mi perfil</MenuItem>
+                    <MenuItem as={RouterLink} to="/perfil" color='black' fontWeight='bold'>Mi perfil</MenuItem>
                     <MenuItem color='red.500' fontWeight='bold' onClick={handleLogout}>
                       Cerrar sesión
                     </MenuItem>
@@ -116,7 +116,7 @@ const Header = () => {
               {
                 session ? (
                   <>
-                    <Link as={RouterLink} to='/profile' onClick={onDrawerClose} fontSize='lg' fontWeight='bold' _hover={{ textDecoration: 'double', opacity: 0.6}}>Mi perfil</Link>
+                    <Link as={RouterLink} to='/perfil' onClick={onDrawerClose} fontSize='lg' fontWeight='bold' _hover={{ textDecoration: 'double', opacity: 0.6}}>Mi perfil</Link>
                     <Button 
                       onClick={() => {
                         handleLogout();

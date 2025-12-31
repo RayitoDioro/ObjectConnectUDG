@@ -7,6 +7,7 @@ import Login from './components/pages/login/Login.tsx';
 import LostObjects from './components/pages/lostobjects/LostObjects.tsx';
 import FoundObjects from './components/pages/foundobjects/foundobjects.tsx';
 import PublishObject from './components/pages/publishobject/PublishObject.tsx'; // 1. Importamos el nuevo componente
+import Profile from './components/pages/profile/Profile.tsx';
 import { AuthProvider } from './context/AuthContext.tsx';
 import { ProtectedRoute } from './components/common/ProtectedRoute.tsx';
 import Chats from './components/pages/chats/Chats.tsx';
@@ -40,6 +41,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <MainLayout><Chats /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <ProtectedRoute>
+                <MainLayout><Profile /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/perfil/:userId"
+            element={
+              <ProtectedRoute>
+                <MainLayout><Profile /></MainLayout>
               </ProtectedRoute>
             }
           />

@@ -1,14 +1,7 @@
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
 import { supabaseClient } from '../supabaseClient';
 import { type Session } from '@supabase/supabase-js';
-
-// Tipo para definir el perfil de la tabla 'user_profile
-export type UserProfile = {
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  photo_profile_url: string | null;
-};
+import { type UserProfile } from '../types';
 
 // Aquí defino el tipo de datos que tendrá el contexto (sesión y perfil de usuario)
 type AuthContextType = {

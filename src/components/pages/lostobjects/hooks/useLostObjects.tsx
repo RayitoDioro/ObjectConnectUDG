@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import type { FullCardProps } from "@/types";
+import type { FullCardProps, Post, UserProfile } from "@/types";
 import { useSchemas } from "../../../../hooks/useSchemas";
+import { supabaseClient } from "@/supabaseClient";
 
 export const useLostObjects = () => {
     const { getPosts } = useSchemas();
@@ -12,26 +13,50 @@ export const useLostObjects = () => {
     useEffect(() => {
         const fetchLostObjects = async () => {
             try {
-                const posts = await getPosts(1); // 1 for "LOST"
+                const posts: Post[] = await getPosts(1); // 1 for "LOST"
 
                 if (posts) {
-                    const mappedPosts: FullCardProps[] = posts.map((post) => ({
-                        id: post.id,
-                        status: post.post_state_id === 1 ? 'lost' : 'found',
-                        imageUrl: post.photo_url || '', // Default to empty string if null
-                        altText: post.title, // Use title as alt text
-                        title: post.title,
-                        date: new Date(post.date_was_found || post.created_at).toLocaleDateString(),
-                        location: post.location || 'Sin ubicación',
-                        description: post.description || 'Sin descripción',
-                        userId: post.user_id,
-                    }));
+                    // Get unique user IDs from posts, filtering out any null/undefined values
+                    const userIds = [...new Set(posts.map(post => post.user_id).filter(Boolean))];
+                    
+                    let profiles: UserProfile[] = [];
+                    // Only call the RPC function if there are user IDs to fetch
+                    if (userIds.length > 0) {
+                        const { data, error: profileError } = await supabaseClient
+                            .rpc('get_public_user_profiles', { user_ids: userIds });
+
+                        if (profileError) throw profileError;
+                        if (data) {
+                            profiles = data;
+                        }
+                    }
+
+                    // Create a map for easy lookup
+                    const profileMap = new Map<string, UserProfile>();
+                    profiles.forEach((p: UserProfile) => profileMap.set(p.user_id, p));
+
+                    const mappedPosts: FullCardProps[] = posts.map((post) => {
+                        const userProfile = profileMap.get(post.user_id);
+                        return {
+                            id: post.id,
+                            status: post.post_state_id === 1 ? 'lost' : 'found',
+                            imageUrl: post.photo_url || '',
+                            altText: post.title,
+                            title: post.title,
+                            date: new Date(post.date_was_found || post.created_at).toLocaleDateString(),
+                            rawDate: post.date_was_found || post.created_at,
+                            location: post.location || 'Sin ubicación',
+                            description: post.description || 'Sin descripción',
+                            userId: post.user_id,
+                            authorName: userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : 'Usuario Anónimo',
+                            authorAvatarUrl: userProfile?.photo_profile_url || null,
+                        };
+                    });
                     setLostObjects(mappedPosts);
-                    setFilteredObjects(mappedPosts); // Initially, filtered is all
+                    setFilteredObjects(mappedPosts);
                 }
             } catch (error) {
                 console.error("Error fetching lost objects:", error);
-                // Handle error appropriately
             }
         };
 
