@@ -27,7 +27,7 @@ import { ObjectList } from './subComponents/ObjectList';
 import { useAuth } from '@/context/AuthContext';
 import { useSchemas as useLostObjectPageSchemas } from './hooks/useSchemas';
 import { useSchemas } from '@/hooks/useSchemas';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 
 
 
@@ -50,7 +50,6 @@ export default function LostObjects() {
                 try {
                     const user = await getUserById(selectedObject.userId);
                     setSelectedPostUser(user);
-                    console.log(user)
                 } catch (error) {
                     console.error("Error fetching user:", error);
                     setSelectedPostUser(null);
@@ -184,10 +183,12 @@ export default function LostObjects() {
                                 {/* 1. Información del usuario y metadata */}
                                 {selectedPostUser && (
                                     <Flex justify="space-between" align="center">
-                                        <Flex align="center">
-                                            <Avatar size="sm" src={selectedPostUser.photo_profile_url} name={`${selectedPostUser.first_name} ${selectedPostUser.last_name}`} />
-                                            <Text ml={3} fontWeight="bold" color="gray.700">{`${selectedPostUser.first_name} ${selectedPostUser.last_name}`}</Text>
-                                        </Flex>
+                                        <RouterLink to={`/perfil/${selectedObject.userId}`} onClick={onClose}>
+                                            <Flex align="center" p={2} borderRadius="md" _hover={{ bg: 'gray.100', cursor: 'pointer' }}>
+                                                <Avatar size="sm" src={selectedPostUser.photo_profile_url} name={`${selectedPostUser.first_name} ${selectedPostUser.last_name}`} />
+                                                <Text ml={3} fontWeight="bold" color="gray.700">{`${selectedPostUser.first_name} ${selectedPostUser.last_name}`}</Text>
+                                            </Flex>
+                                        </RouterLink>
                                         <Text fontSize="xs" color="gray.500" textAlign="right">
                                             {selectedObject.date},<br />{selectedObject.location}
                                         </Text>

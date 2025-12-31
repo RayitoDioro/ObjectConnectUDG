@@ -16,9 +16,13 @@ import {
     Collapse,
     useDisclosure,
     Box,
+    Avatar,
+    HStack,
+    Link,
 } from '@chakra-ui/react';
 import { SearchIcon, ArrowUpDownIcon } from '@chakra-ui/icons';
 import type { FullCardProps } from '../../../../types';
+import { Link as RouterLink } from 'react-router-dom';
 
 interface ObjectListProps {
     title: string;
@@ -39,28 +43,10 @@ export const ObjectList = ({ title, items, emptyListMessage, onCardClick, select
             item.location.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-        const monthMapping: { [key: string]: number } = {
-            'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-            'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dic': 11
-        };
-
-        const parseDate = (dateString: string) => {
-            const parts = dateString.split('/');
-            if (parts.length === 3) {
-                const day = parseInt(parts[0], 10);
-                const month = monthMapping[parts[1]];
-                const year = parseInt(parts[2], 10);
-                if (!isNaN(day) && month !== undefined && !isNaN(year)) {
-                    return new Date(year, month, day);
-                }
-            }
-            return new Date(0); // Fallback for invalid dates
-        };
-
         return filtered.sort((a, b) => {
-            const dateA = parseDate(a.date).getTime();
-            const dateB = parseDate(b.date).getTime();
-            return sortBy === 'newest' ? dateB - dateA : dateA - dateB;
+            const itemA_timestamp = new Date(a.rawDate).getTime();
+            const itemB_timestamp = new Date(b.rawDate).getTime();
+            return sortBy === 'newest' ? itemB_timestamp - itemA_timestamp : itemA_timestamp - itemB_timestamp;
         });
     }, [items, searchTerm, sortBy]);
 
@@ -101,7 +87,7 @@ export const ObjectList = ({ title, items, emptyListMessage, onCardClick, select
             {displayedItems.length > 0 ? (
                 <VStack spacing={4} align="stretch">
                     {displayedItems.map((item) => (
-                        <Card as="button"
+                        <Card
                             key={item.id}
                             direction={{ base: 'column', sm: 'row' }}
                             overflow='hidden'
@@ -109,8 +95,7 @@ export const ObjectList = ({ title, items, emptyListMessage, onCardClick, select
                             variant='outline'
                             bg={selectedObjectId === item.id ? 'blue.50' : 'white'}
                             borderColor={selectedObjectId === item.id ? 'brand.blue' : 'gray.200'}
-                            cursor="pointer"
-                            onClick={() => onCardClick(item)} textAlign="left" w="100%"
+                            w="100%"
                             _hover={{ boxShadow: 'md', borderColor: 'brand.blueLight' }}
                             transition="all 0.2s"
                         >
@@ -120,15 +105,27 @@ export const ObjectList = ({ title, items, emptyListMessage, onCardClick, select
                                 src={item.imageUrl}
                                 alt={item.altText}
                                 bg="gray.100"
+                                onClick={() => onCardClick(item)}
+                                cursor="pointer"
                             />
-                            <Stack>
+                            <Stack flex="1">
                                 <CardBody>
-                                    <Heading size='md' color="brand.blue">{item.title}</Heading>
-                                    <Text py='2' fontSize="sm" noOfLines={1}>
-                                        Descripción: {item.description.length > 40 ? `${item.description.substring(0, 40)}...` : item.description}
-                                    </Text>
-                                    <Text fontSize="sm">Ubicación: {item.location}</Text>
-                                    <Text color="gray.500" fontSize="xs" pt='2'>Fecha: {item.date}</Text>
+                                    <Box onClick={() => onCardClick(item)} cursor="pointer">
+                                        <Heading size='md' color="brand.blue">{item.title}</Heading>
+                                        <Text py='2' fontSize="sm" noOfLines={1}>
+                                            Descripción: {item.description.length > 40 ? `${item.description.substring(0, 40)}...` : item.description}
+                                        </Text>
+                                        <Text fontSize="sm">Ubicación: {item.location}</Text>
+                                        <Text color="gray.500" fontSize="xs" pt='2'>Fecha: {item.date}</Text>
+                                    </Box>
+                                    <Link as={RouterLink} to={`/perfil/${item.userId}`} mt={3} _hover={{ textDecoration: 'none' }}>
+                                        <HStack mt={2} align="center">
+                                            <Avatar size="sm" name={item.authorName} src={item.authorAvatarUrl || ''} />
+                                            <Text fontSize="sm" color="gray.600" fontWeight="medium" noOfLines={1}>
+                                                {item.authorName}
+                                            </Text>
+                                        </HStack>
+                                    </Link>
                                 </CardBody>
                             </Stack>
                         </Card>

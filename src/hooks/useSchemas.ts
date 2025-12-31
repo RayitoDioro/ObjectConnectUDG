@@ -96,25 +96,18 @@ export function useSchemas() {
      */
     async function getUserById(userId: string) {
         try {
-            // Por razones de seguridad, no se puede acceder a la tabla 'auth.users'
-            // de Supabase desde el cliente para obtener el email de otros usuarios.
-            // Esta función solo obtiene el perfil público desde 'user_profile'.
             const { data, error } = await supabaseClient
-                .from('user_profile')
-                .select('first_name, last_name, photo_profile_url, creation_date')
-                .eq('user_id', userId)
+                .rpc('get_public_user_by_id', { p_user_id: userId })
                 .single();
 
-            // Si hay un error y no es porque el usuario no existe, lo lanzamos.
-            if (error && error.code !== 'PGRST116') {
-                console.error('Error fetching user profile:', error);
+            if (error) {
+                console.error('Error fetching user profile via RPC:', error);
                 throw error;
             }
 
             return data;
         } catch (err) {
             console.error('An unexpected error occurred in getUserById:', err);
-            // Re-lanzar el error para que el código que llama a la función pueda manejarlo
             throw err;
         }
     }

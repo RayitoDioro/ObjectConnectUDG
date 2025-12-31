@@ -1,3 +1,10 @@
+export type UserProfile = {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  photo_profile_url: string | null;
+};
+
 export type CardProps = {
   id: number;
   status: 'lost' | 'found';
@@ -15,10 +22,26 @@ export type FullCardProps = {
   altText: string;
   title: string;
   date: string;
+  rawDate: string;
   location: string;
   description: string;
   userId: string;
+  authorName: string;
+  authorAvatarUrl: string | null;
 };
+
+export type Post = {
+    id: number;
+    created_at: string;
+    title: string;
+    description: string | null;
+    photo_url: string | null;
+    location: string | null;
+    user_id: string;
+    post_state_id: number;
+    date_was_found: string | null;
+};
+
 
 export type UserProps = {
   id: string;
