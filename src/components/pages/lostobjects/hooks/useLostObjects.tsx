@@ -61,7 +61,7 @@ export const useLostObjects = () => {
         };
 
         fetchLostObjects();
-    }, [getPosts]);
+    }, []);
 
 
     const filterObjectsByTerm = (term: string) => {
