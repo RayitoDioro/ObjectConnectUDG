@@ -188,265 +188,268 @@ const PublishObject = () => {
 
       <Box p={{ base: 6, md: 10 }}>
         {/* Agregar onSubmit al formulario */}
-        <VStack as="form" spacing={8} align="stretch" onSubmit={handleSubmit}>
-          <Box>
-            <Heading
-              as="h2"
-              size="lg"
-              color="brand.primary"
-              pb={2}
-              borderBottom="2px solid"
-              borderColor="brand.lightGray"
-            >
-              Información Principal
-            </Heading>
-            <VStack spacing={5} mt={6}>
-              {/* ... (resto de los FormControl no cambian) ... */}
-              <FormControl isRequired isInvalid={!!errors.title}>
-                <FormLabel fontWeight="600">Título del Reporte</FormLabel>
-                <Input
-                  name="title"
-                  placeholder="Ej. Mochila negra en Biblioteca"
-                />
-                {errors.title && (
-                  <FormErrorMessage>{errors.title}</FormErrorMessage>
-                )}
-              </FormControl>
-              <FormControl isRequired isInvalid={!!errors.description}>
-                <FormLabel fontWeight="600">Descripción Detallada</FormLabel>
-                <Textarea
-                  name="description"
-                  placeholder="Marca, color, contenido especial, señas particulares..."
-                  minH="100px"
-                />
-                {errors.description && (
-                  <FormErrorMessage>{errors.description}</FormErrorMessage>
-                )}
-              </FormControl>
-            </VStack>
-          </Box>
+        <form onSubmit={handleSubmit}>
+          <VStack spacing={8} align="stretch">
+            <Box>
+              <Heading
+                as="h2"
+                size="lg"
+                color="brand.primary"
+                pb={2}
+                borderBottom="2px solid"
+                borderColor="brand.lightGray"
+              >
+                Información Principal
+              </Heading>
+              <VStack spacing={5} mt={6}>
+                {/* ... (resto de los FormControl no cambian) ... */}
+                <FormControl isRequired isInvalid={!!errors.title}>
+                  <FormLabel fontWeight="600">Título del Reporte</FormLabel>
+                  <Input
+                    name="title"
+                    placeholder="Ej. Mochila negra en Biblioteca"
+                  />
+                  {errors.title && (
+                    <FormErrorMessage>{errors.title}</FormErrorMessage>
+                  )}
+                </FormControl>
+                <FormControl isRequired isInvalid={!!errors.description}>
+                  <FormLabel fontWeight="600">Descripción Detallada</FormLabel>
+                  <Textarea
+                    name="description"
+                    placeholder="Marca, color, contenido especial, señas particulares..."
+                    minH="100px"
+                  />
+                  {errors.description && (
+                    <FormErrorMessage>{errors.description}</FormErrorMessage>
+                  )}
+                </FormControl>
+              </VStack>
+            </Box>
 
-          <Box>
-            <Heading
-              as="h2"
-              size="lg"
-              color="brand.primary"
-              pb={2}
-              borderBottom="2px solid"
-              borderColor="brand.lightGray"
-            >
-              Detalles Clave
-            </Heading>
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5} mt={6}>
-              {/* ... (resto de los FormControl no cambian) ... */}
-              <FormControl isRequired isInvalid={!!errors.category}>
-                <FormLabel fontWeight="600">Categoría</FormLabel>
-                <Select name="category" placeholder="Selecciona una categoría">
-                  <option>Electrónicos</option>
-                  <option>Libros y Libretas</option>
-                  <option>Credenciales</option>
-                  <option>Ropa y Accesorios</option>
-                  <option>Otros</option>
-                </Select>
-              </FormControl>
-              <FormControl isRequired isInvalid={!!errors.foundWhere}>
-                <FormLabel fontWeight="600">¿Dónde lo encontraste?</FormLabel>
-                <Input
-                  name="foundWhere"
-                  placeholder="Ej. CUCEI, Edificio G, Aula 205"
-                />
-                {errors.foundWhere && (
-                  <FormErrorMessage>{errors.foundWhere}</FormErrorMessage>
-                )}
-              </FormControl>
+            <Box>
+              <Heading
+                as="h2"
+                size="lg"
+                color="brand.primary"
+                pb={2}
+                borderBottom="2px solid"
+                borderColor="brand.lightGray"
+              >
+                Detalles Clave
+              </Heading>
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5} mt={6}>
+                {/* ... (resto de los FormControl no cambian) ... */}
+                <FormControl isRequired isInvalid={!!errors.category}>
+                  <FormLabel fontWeight="600">Categoría</FormLabel>
+                  <Select name="category" placeholder="Selecciona una categoría">
+                    <option>Electrónicos</option>
+                    <option>Libros y Libretas</option>
+                    <option>Credenciales</option>
+                    <option>Ropa y Accesorios</option>
+                    <option>Otros</option>
+                  </Select>
+                </FormControl>
+                <FormControl isRequired isInvalid={!!errors.foundWhere}>
+                  <FormLabel fontWeight="600">¿Dónde lo encontraste?</FormLabel>
+                  <Input
+                    name="foundWhere"
+                    placeholder="Ej. CUCEI, Edificio G, Aula 205"
+                  />
+                  {errors.foundWhere && (
+                    <FormErrorMessage>{errors.foundWhere}</FormErrorMessage>
+                  )}
+                </FormControl>
 
-              <FormControl isRequired isInvalid={!!errors.dateFound}>
-                <FormLabel fontWeight="600">
-                  Fecha en que lo encontraste
-                </FormLabel>
-                <Input name="dateFound" type="date" />
-                {errors.dateFound && (
-                  <FormErrorMessage>{errors.dateFound}</FormErrorMessage>
-                )}
-              </FormControl>
-            </SimpleGrid>
-          </Box>
+                <FormControl isRequired isInvalid={!!errors.dateFound}>
+                  <FormLabel fontWeight="600">
+                    Fecha en que lo encontraste
+                  </FormLabel>
+                  <Input name="dateFound" type="date" />
+                  {errors.dateFound && (
+                    <FormErrorMessage>{errors.dateFound}</FormErrorMessage>
+                  )}
+                </FormControl>
+              </SimpleGrid>
+            </Box>
 
-          <Box>
-            <Heading
-              as="h2"
-              size="lg"
-              color="brand.primary"
-              pb={2}
-              borderBottom="2px solid"
-              borderColor="brand.lightGray"
-            >
-              Sube una Fotografía
-            </Heading>
-            {errors.photos && (
-              <Text color="red.500" mt={2}>
-                {errors.photos}
-              </Text>
+            <Box>
+              <Heading
+                as="h2"
+                size="lg"
+                color="brand.primary"
+                pb={2}
+                borderBottom="2px solid"
+                borderColor="brand.lightGray"
+              >
+                Sube una Fotografía
+              </Heading>
+              {errors.photos && (
+                <Text color="red.500" mt={2}>
+                  {errors.photos}
+                </Text>
+              )}
+
+              {/* 6. Lógica condicional: Muestra la vista previa si hay archivos, o la caja de carga si no los hay. */}
+              {selectedFiles.length > 0 ? (
+                <Box mt={6}>
+                  <Flex justify="space-between" align="center" mb={4}>
+                    <Badge colorScheme="green" fontSize="md" px={3} py={1}>
+                      {selectedFiles.length} foto
+                      {selectedFiles.length !== 1 ? "s" : ""} seleccionada
+                      {selectedFiles.length !== 1 ? "s" : ""}
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      colorScheme="red"
+                      onClick={handleClearFiles}
+                    >
+                      Limpiar todas
+                    </Button>
+                  </Flex>
+
+                  <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} spacing={3}>
+                    {selectedFiles.map((file, index) => (
+                      <Box
+                        key={index}
+                        position="relative"
+                        borderRadius="lg"
+                        overflow="hidden"
+                        boxShadow="md"
+                        transition="all 0.2s"
+                      >
+                        <Image
+                          src={URL.createObjectURL(file)}
+                          alt={`Vista previa ${index + 1}`}
+                          w="100%"
+                          h="120px"
+                          objectFit="cover"
+                        />
+                        <Button
+                          position="absolute"
+                          top={1}
+                          right={1}
+                          size="sm"
+                          colorScheme="red"
+                          variant="solid"
+                          rounded="full"
+                          p={0}
+                          w="28px"
+                          h="28px"
+                          onClick={() => {
+                            handleRemoveFile(index);
+                            if(selectedFiles.length === 1) {
+                              handleClearFiles();
+                            }
+                          }}
+                          _hover={{ transform: "scale(1.1)" }}
+                        >
+                          <DeleteIcon w={3} h={3} />
+                        </Button>
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+
+                  <Button
+                    mt={4}
+                    variant="outline"
+                    colorScheme="blue"
+                    onClick={handleUploadBoxClick}
+                    size="sm"
+                  >
+                    + Agregar más fotos
+                  </Button>
+                </Box>
+              ) : (
+                <VStack
+                  mt={6}
+                  border="2px dashed"
+                  borderColor="brand.mediumGray"
+                  borderRadius="lg"
+                  p={10}
+                  spacing={4}
+                  bg="brand.lightGray"
+                  cursor="pointer"
+                  onClick={handleUploadBoxClick}
+                  transition="all 0.3s"
+                  _hover={{
+                    borderColor: "brand.primary",
+                    bg: "blue.50",
+                  }}
+                >
+                  <AttachmentIcon
+                    w={12}
+                    h={12}
+                    color="brand.primary"
+                    opacity={0.7}
+                  />
+                  <VStack spacing={1}>
+                    <Text fontWeight="600" fontSize="md" color="gray.700">
+                      Arrastra tus fotos aquí
+                    </Text>
+                    <Text fontSize="sm" color="gray.500">
+                      o haz click para seleccionar
+                    </Text>
+                  </VStack>
+                </VStack>
+              )}
+
+              <Input
+                name="photos"
+                type="file"
+                multiple
+                accept="image/*"
+                display="none"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+              />
+            </Box>
+
+            {alertMessage && (
+              <Alert status={alertMessage.type} mb={4}>
+                <AlertIcon />
+                <Box>
+                  <AlertTitle>{alertMessage.title}</AlertTitle>
+                  <AlertDescription>{alertMessage.description}</AlertDescription>
+                </Box>
+              </Alert>
             )}
 
-            {/* 6. Lógica condicional: Muestra la vista previa si hay archivos, o la caja de carga si no los hay. */}
-            {selectedFiles.length > 0 ? (
-              <Box mt={6}>
-                <Flex justify="space-between" align="center" mb={4}>
-                  <Badge colorScheme="green" fontSize="md" px={3} py={1}>
-                    {selectedFiles.length} foto
-                    {selectedFiles.length !== 1 ? "s" : ""} seleccionada
-                    {selectedFiles.length !== 1 ? "s" : ""}
-                  </Badge>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    colorScheme="red"
-                    onClick={handleClearFiles}
-                  >
-                    Limpiar todas
-                  </Button>
-                </Flex>
-
-                <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} spacing={3}>
-                  {selectedFiles.map((file, index) => (
-                    <Box
-                      key={index}
-                      position="relative"
-                      borderRadius="lg"
-                      overflow="hidden"
-                      boxShadow="md"
-                      transition="all 0.2s"
-                    >
-                      <Image
-                        src={URL.createObjectURL(file)}
-                        alt={`Vista previa ${index + 1}`}
-                        w="100%"
-                        h="120px"
-                        objectFit="cover"
-                      />
-                      <Button
-                        position="absolute"
-                        top={1}
-                        right={1}
-                        size="sm"
-                        colorScheme="red"
-                        variant="solid"
-                        rounded="full"
-                        p={0}
-                        w="28px"
-                        h="28px"
-                        onClick={() => {
-                          handleRemoveFile(index);
-                          if(selectedFiles.length === 1) {
-                            handleClearFiles();
-                          }
-                        }}
-                        _hover={{ transform: "scale(1.1)" }}
-                      >
-                        <DeleteIcon w={3} h={3} />
-                      </Button>
-                    </Box>
-                  ))}
-                </SimpleGrid>
-
-                <Button
-                  mt={4}
-                  variant="outline"
-                  colorScheme="blue"
-                  onClick={handleUploadBoxClick}
-                  size="sm"
-                >
-                  + Agregar más fotos
-                </Button>
-              </Box>
-            ) : (
-              <VStack
-                mt={6}
-                border="2px dashed"
-                borderColor="brand.mediumGray"
-                borderRadius="lg"
-                p={10}
-                spacing={4}
-                bg="brand.lightGray"
-                cursor="pointer"
-                onClick={handleUploadBoxClick}
-                transition="all 0.3s"
-                _hover={{
-                  borderColor: "brand.primary",
-                  bg: "blue.50",
+            {/* Botones */}
+            <HStack spacing={4} mt={5} justify="flex-end">
+              <Button
+                variant="outline"
+                type="button"
+                colorScheme="gray"
+                onClick={() => {
+                  handleClearFiles();
+                  document.querySelector("form")?.reset();
                 }}
               >
-                <AttachmentIcon
-                  w={12}
-                  h={12}
-                  color="brand.primary"
-                  opacity={0.7}
-                />
-                <VStack spacing={1}>
-                  <Text fontWeight="600" fontSize="md" color="gray.700">
-                    Arrastra tus fotos aquí
-                  </Text>
-                  <Text fontSize="sm" color="gray.500">
-                    o haz click para seleccionar
-                  </Text>
-                </VStack>
-              </VStack>
-            )}
+                Cancelar
+              </Button>
+              <Button
+                bg="brand.primary"
+                color="white"
+                _hover={{
+                  bg: "brand.secondary",
+                  transform: "translateY(-2px)",
+                  boxShadow: "lg",
+                }}
+                _active={{ transform: "translateY(0)" }}
+                type="submit"
+                isLoading={isSubmitting}
+                fontWeight="600"
+                px={8}
+                transition="all 0.2s"
+              >
+                PUBLICAR OBJETO
+              </Button>
+            </HStack>
 
-            <Input
-              name="photos"
-              type="file"
-              multiple
-              accept="image/*"
-              display="none"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-            />
-          </Box>
-
-          {alertMessage && (
-            <Alert status={alertMessage.type} mb={4}>
-              <AlertIcon />
-              <Box>
-                <AlertTitle>{alertMessage.title}</AlertTitle>
-                <AlertDescription>{alertMessage.description}</AlertDescription>
-              </Box>
-            </Alert>
-          )}
-
-          {/* Botones */}
-          <HStack spacing={4} mt={5} justify="flex-end">
-            <Button
-              variant="outline"
-              type="button"
-              colorScheme="gray"
-              onClick={() => {
-                handleClearFiles();
-                document.querySelector("form")?.reset();
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              bg="brand.primary"
-              color="white"
-              _hover={{
-                bg: "brand.secondary",
-                transform: "translateY(-2px)",
-                boxShadow: "lg",
-              }}
-              _active={{ transform: "translateY(0)" }}
-              type="submit"
-              isLoading={isSubmitting}
-              fontWeight="600"
-              px={8}
-              transition="all 0.2s"
-            >
-              PUBLICAR OBJETO
-            </Button>
-          </HStack>
-        </VStack>
+          </VStack>
+        </form>
       </Box>
     </Container>
   );
