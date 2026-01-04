@@ -81,3 +81,9 @@ export type FilterControlsProps = {
   sortBy: string;
   setSortBy: React.Dispatch<React.SetStateAction<string>>;
 };
+
+export type AlertMessage = {
+  type: 'success' | 'error';
+  title: string;
+  description: string;
+};
