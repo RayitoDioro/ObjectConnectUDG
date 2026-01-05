@@ -61,6 +61,7 @@ export const useLostObjects = () => {
         };
 
         fetchLostObjects();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 
