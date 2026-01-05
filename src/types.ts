@@ -1,3 +1,22 @@
+export type Thread = {
+  id: number;
+  created_at: string;
+  post_id: number | null;
+};
+
+export type Message = {
+  id: number;
+  thread_id: number;
+  sender_id: string;
+  content: string;
+  created_at: string;
+};
+
+export type ThreadParticipant = {
+  thread_id: number;
+  user_id: string;
+};
+
 export type UserProfile = {
   user_id: string;
   first_name: string;
@@ -61,4 +80,10 @@ export type FilterControlsProps = {
   setSearchObj: React.Dispatch<React.SetStateAction<string>>;
   sortBy: string;
   setSortBy: React.Dispatch<React.SetStateAction<string>>;
+};
+
+export type AlertMessage = {
+  type: 'success' | 'error';
+  title: string;
+  description: string;
 };

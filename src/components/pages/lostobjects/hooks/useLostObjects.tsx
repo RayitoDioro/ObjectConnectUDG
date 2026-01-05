@@ -61,7 +61,8 @@ export const useLostObjects = () => {
         };
 
         fetchLostObjects();
-    }, [getPosts]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
 
     const filterObjectsByTerm = (term: string) => {

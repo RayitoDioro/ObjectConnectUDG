@@ -22,7 +22,6 @@ export function useSchemas() {
         payload: PostPayload,
         file?: File
     ) {
-        try {
             let publicUrl: string | null = null;
 
             if (file) {
@@ -43,7 +42,7 @@ export function useSchemas() {
                     .from('post_images')
                     .getPublicUrl(path);
 
-                publicUrl = (urlData as any)?.publicUrl ?? null;
+                publicUrl = (urlData as { publicUrl: string })?.publicUrl ?? null;
             }
 
             const insertPayload = {
@@ -65,29 +64,16 @@ export function useSchemas() {
             if (insertError) throw insertError;
 
             return inserted;
-        } catch (err) {
-            // re-lanzar para que el componente lo maneje
-            throw err;
-        }
     }
 
     async function getPosts(postStateId?: number) {
-        try {
-            let query = supabaseClient.from('posts').select('*');
+        let query = supabaseClient.from('posts').select('*');
+        if (postStateId) query = query.eq('post_state_id', postStateId);
 
-            if (postStateId) {
-                query = query.eq('post_state_id', postStateId);
-            }
+        const { data, error } = await query;
+        if (error) throw error;
 
-            const { data, error } = await query;
-
-            if (error) throw error;
-
-            return data;
-        } catch (err) {
-            // re-lanzar para que el componente lo maneje
-            throw err;
-        }
+        return data;
     }
 
     /**

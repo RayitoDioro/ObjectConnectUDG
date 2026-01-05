@@ -87,12 +87,16 @@ export default function LostObjects() {
         setIsTargetSet(false);
     }
 
-    const handleCreateChatWithUser = (finderId: string, postId: number, objectOwnerId: string) => {
+    const handleCreateChatWithUser = async (finderId: string, postId: number, objectOwnerId: string) => {
         // Lógica para crear un chat con el usuario dado su ID
-        console.log(lostObjects)
         console.log(`Creating chat with user ID: ${finderId} on post ID: ${postId} from object owner ID: ${objectOwnerId}`);
-        createThreaForPost(finderId, postId, objectOwnerId);
-        navigate('/chats');
+        const threadId = await createThreaForPost(finderId, postId, objectOwnerId);
+        if (threadId) {
+            navigate(`/chats/${threadId}`);
+        } else {
+            // Manejar el error, mostrar un mensaje al usuario
+            console.error("No se pudo crear el hilo de chat.");
+        }
     }
 
     return (
@@ -209,7 +213,7 @@ export default function LostObjects() {
                                 <Text>{selectedObject.description}</Text>
 
                                 {/* 5. Acciones de Contacto */}
-                                {selectedPostUser && (
+                                {selectedPostUser && profile && selectedObject.userId !== profile.user_id && (
                                     <VStack spacing={2} align="stretch" pt={4}>
                                         <Button
                                             colorScheme="brand"
