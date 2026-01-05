@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAuth, type UserProfile } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { useSchemas } from '@/hooks/useSchemas';
 import { Box, Spinner, Text, VStack } from '@chakra-ui/react';
 import UserProfileCard from './subcomponents/UserProfileCard';
 import UserPostsList from './subcomponents/UserPostsList';
-import type { FullCardProps, Post } from '@/types';
+import type { FullCardProps, Post, UserProfile } from '@/types';
 
 const Profile = () => {
   const { userId: paramUserId } = useParams<{ userId: string }>();
@@ -46,7 +46,7 @@ const Profile = () => {
         if (targetUserId === loggedInUserId) {
             profileData = loggedInUserProfile;
         } else {
-            const fetchedProfile = await getUserById(targetUserId);
+            const fetchedProfile = await getUserById(targetUserId) as UserProfile | null;
             if (fetchedProfile) {
                 profileData = {
                     user_id: targetUserId,
@@ -82,8 +82,8 @@ const Profile = () => {
 
         setUserPosts(mappedPosts);
 
-      } catch (err: any) {
-        setError(err.message || 'Ocurrió un error al cargar el perfil.');
+      } catch (err: unknown) {
+        setError((err as Error).message || 'Ocurrió un error al cargar el perfil.');
       } finally {
         setLoading(false);
       }
