@@ -11,6 +11,7 @@ import Profile from './components/pages/profile/Profile.tsx';
 import { AuthProvider } from './context/AuthContext.tsx';
 import { ProtectedRoute } from './components/common/ProtectedRoute.tsx';
 import Chats from './components/pages/chats/Chats.tsx';
+import ProfileSettings from './ProfileSettings';
 
 function App() {
   // Elimina el useAuth aquí, solo usa el Provider
@@ -57,6 +58,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <MainLayout><Profile /></MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <MainLayout><ProfileSettings /></MainLayout>
               </ProtectedRoute>
             }
           />
