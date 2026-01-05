@@ -57,14 +57,22 @@ const Header = () => {
               session ? (
                 <Menu>
                   <MenuButton as={Button} rounded='full' variant='link' cursor='pointer' >
-                    <Avatar 
-                      size='md'
-                      bg='brand.yellow'
-                      color='brand.blue'
-                      src={profile?.photo_profile_url || session?.user?.user_metadata?.avatar_url || ''}
-                      name={profile ? `${profile.first_name} ${profile.last_name}` : (session?.user?.user_metadata?.full_name || session?.user?.email)}
-                      referrerPolicy="no-referrer"
-                    />
+                    <Box
+                      border="4px solid"
+                      borderRadius="full"
+                      borderColor="brand.yellow"
+                      pointerEvents="none"
+                      p={0}
+                    >
+                      <Avatar 
+                        size='md'
+                        bg='brand.yellow'
+                        color='brand.blue'
+                        src={profile?.photo_profile_url || session?.user?.user_metadata?.avatar_url || ''}
+                        name={profile ? `${profile.first_name} ${profile.last_name}` : (session?.user?.user_metadata?.full_name || session?.user?.email)}
+                        referrerPolicy="no-referrer"
+                      />
+                    </Box>
                   </MenuButton>
                   <MenuList>
                     <MenuItem color='black' fontWeight='black'>

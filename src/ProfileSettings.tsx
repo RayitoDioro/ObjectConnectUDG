@@ -3,7 +3,7 @@ import { supabaseClient } from './supabaseClient';
 import { useAuth } from './context/AuthContext'; 
 import { 
   Box, Button, FormControl, FormLabel, Input, VStack, Heading, 
-  Avatar, useToast, Container, Text, Flex 
+  Avatar, useToast, Container, Flex 
 } from '@chakra-ui/react';
 
 export default function ProfileSettings() {
@@ -66,10 +66,10 @@ export default function ProfileSettings() {
       const { data } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
       setAvatarUrl(data.publicUrl);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Error al subir imagen',
-        description: error.message,
+        description: (error as Error).message,
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -103,10 +103,10 @@ export default function ProfileSettings() {
         duration: 3000,
         isClosable: true,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Error al guardar',
-        description: error.message,
+        description: (error as Error).message,
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -128,13 +128,20 @@ export default function ProfileSettings() {
             
             {/* Sección de Avatar */}
             <Flex direction="column" align="center" gap={4}>
-              <Avatar 
-                size="2xl" 
-                src={avatarUrl || ''} 
-                name={`${firstName} ${lastName}`} 
+              <Box
                 border="4px solid"
+                borderRadius="full"
                 borderColor="brand.yellow"
-              />
+                pointerEvents="none"
+                p={0}
+              >
+                <Avatar 
+                  size="2xl" 
+                  src={avatarUrl || ''} 
+                  name={`${firstName} ${lastName}`} 
+                  border="none"
+                />
+              </Box>
               <Button as="label" cursor="pointer" isLoading={uploading} colorScheme="blue" size="sm">
                 Cambiar Foto
                 <input type="file" hidden accept="image/*" onChange={uploadAvatar} />
