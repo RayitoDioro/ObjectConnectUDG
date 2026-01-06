@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useSchemas } from '@/hooks/useSchemas';
-import { Box, Spinner, Text, VStack } from '@chakra-ui/react';
+import { Box, Spinner, Text, VStack, useToast } from '@chakra-ui/react';
 import UserProfileCard from './subcomponents/UserProfileCard';
 import UserPostsList from './subcomponents/UserPostsList';
 import type { FullCardProps, Post, UserProfile } from '@/types';
+import { supabaseClient } from '@/supabaseClient';
+
 
 const Profile = () => {
   const { userId: paramUserId } = useParams<{ userId: string }>();
@@ -16,8 +18,54 @@ const Profile = () => {
   const [userPosts, setUserPosts] = useState<FullCardProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const toast = useToast(); 
+
+  // Función 1: Marcar como Encontrado
+  const handleMarkAsFound = async (postId: number) => {
+    try {
+      const { error } = await supabaseClient
+        .from('posts')
+        .update({ post_state_id: 2 }) // Cambiamos el estado a 2 (Encontrado)
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      // Actualizamos la lista localmente para que se mueva de sección al instante
+      setUserPosts((prevPosts) => 
+        prevPosts.map((post) => 
+          post.id === postId ? { ...post, status: 'found' } : post
+        )
+      );
+
+      toast({ title: '¡Objeto marcado como encontrado!', status: 'success', duration: 3000 });
+    } catch (err) {
+      toast({ title: 'Error al actualizar', status: 'error', duration: 3000 });
+    }
+  };
+
+  //  Eliminar Publicación
+  const handleDeletePost = async (postId: number) => {
+    if (!window.confirm("¿Estás seguro de que quieres eliminar esta publicación?")) return;
+
+    try {
+      const { error } = await supabaseClient
+        .from('posts')
+        .delete()
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      // Quitamos el post de la lista visualmente
+      setUserPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+
+      toast({ title: 'Publicación eliminada', status: 'info', duration: 3000 });
+    } catch (err) {
+      toast({ title: 'Error al eliminar', status: 'error', duration: 3000 });
+    }
+  };
 
   const loggedInUserId = loggedInUserProfile?.user_id;
+
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -121,7 +169,12 @@ const Profile = () => {
   return (
     <VStack spacing={8} align="stretch">
       <UserProfileCard profile={userProfile} />
-      <UserPostsList posts={userPosts} />
+      <UserPostsList 
+        posts={userPosts} 
+        isOwner={loggedInUserId === userProfile.user_id} // ¿Es mi perfil?
+        onMarkFound={handleMarkAsFound} // Le pasamos la función
+        onDelete={handleDeletePost}     // Le pasamos la función
+      />
     </VStack>
   );
 };
