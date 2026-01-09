@@ -20,7 +20,7 @@ const Profile = () => {
   const [error, setError] = useState<string | null>(null);
   const toast = useToast(); 
 
-  // Función 1: Marcar como Encontrado
+  // Función Marcar como Encontrado
   const handleMarkAsFound = async (postId: number) => {
     try {
       const { error } = await supabaseClient
@@ -38,6 +38,28 @@ const Profile = () => {
       );
 
       toast({ title: '¡Objeto marcado como encontrado!', status: 'success', duration: 3000 });
+    } catch (err) {
+      toast({ title: 'Error al actualizar', status: 'error', duration: 3000 });
+    }
+  };
+  // Función 3: Volver a marcar como PERDIDO (Republicar)
+  const handleMarkAsLost = async (postId: number) => {
+    try {
+      const { error } = await supabaseClient
+        .from('posts')
+        .update({ post_state_id: 1 }) // Regresamos el estado a 1 (Perdido)
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      // Actualizamos la lista visualmente al instante
+      setUserPosts((prevPosts) => 
+        prevPosts.map((post) => 
+          post.id === postId ? { ...post, status: 'lost' } : post
+        )
+      );
+
+      toast({ title: 'Objeto republicado como perdido', status: 'warning', duration: 3000 });
     } catch (err) {
       toast({ title: 'Error al actualizar', status: 'error', duration: 3000 });
     }
@@ -172,8 +194,9 @@ const Profile = () => {
       <UserPostsList 
         posts={userPosts} 
         isOwner={loggedInUserId === userProfile.user_id} // ¿Es mi perfil?
-        onMarkFound={handleMarkAsFound} // Le pasamos la función
-        onDelete={handleDeletePost}     // Le pasamos la función
+        onMarkFound={handleMarkAsFound}
+        onDelete={handleDeletePost}     
+        onMarkLost={handleMarkAsLost}
       />
     </VStack>
   );

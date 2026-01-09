@@ -1,133 +1,72 @@
-import { Box } from "@chakra-ui/react";
-import rectoriaUDG from '@/assets/rectoriaUDG.webp';
+import { useState, useEffect } from "react";
+import { Box, Center, Spinner } from "@chakra-ui/react";
 import PresentationSection from './subComponents/PresentationSection';
 import FilterSortControls from './subComponents/FilterSortControls';
 import ObjectGrid from "./subComponents/ObjectGrid";
-import { type CardProps } from "@/types";
+import { type CardProps, type Post } from "@/types"; 
 import { useObjectFilter } from "./hooks/useObjectFilter";
-
-const objects: CardProps[] = [
-  {
-    id: 1,
-    status: "lost",
-    imageUrl: rectoriaUDG,
-    altText: "Mochila Negra",
-    title: "Mochila Negra en CUCEI",
-    date: "15/May/2024",
-    location: "Edificio A",
-  },
-  {
-    id: 2,
-    status: "lost",
-    imageUrl: "",
-    altText: "Celular",
-    title: "Celular en Biblioteca",
-    date: "16/May/2024",
-    location: "Piso 2",
-  },
-  {
-    id: 3,
-    status: "lost",
-    imageUrl: "",
-    altText: "Celular",
-    title: "Celular en Biblioteca",
-    date: "16/May/2024",
-    location: "Piso 2",
-  },
-  {
-    id: 4,
-    status: "lost",
-    imageUrl: "",
-    altText: "Celular",
-    title: "Celular en Biblioteca",
-    date: "16/May/2024",
-    location: "Piso 2",
-  },
-  {
-    id: 5,
-    status: "lost",
-    imageUrl: "",
-    altText: "Celular",
-    title: "Celular en Biblioteca",
-    date: "16/May/2024",
-    location: "Piso 2",
-  },
-  {
-    id: 6,
-    status: "lost",
-    imageUrl: "",
-    altText: "Celular",
-    title: "Celular en Biblioteca",
-    date: "16/May/2024",
-    location: "Piso 2",
-  },
-  {
-    id: 7,
-    status: "found",
-    imageUrl: "",
-    altText: "Llaves",
-    title: "Llaves cerca de la Biblioteca",
-    date: "15/May/2024",
-    location: "Llavero rojo",
-  },
-  {
-    id: 8,
-    status: "found",
-    imageUrl: "",
-    altText: "Lentes",
-    title: "Lentes de armazón negro",
-    date: "16/May/2024",
-    location: "Encontrados en la cafetería",
-  },
-  {
-    id: 9,
-    status: "found",
-    imageUrl: "",
-    altText: "Llaves",
-    title: "Llaves cerca de la Biblioteca",
-    date: "15/May/2024",
-    location: "Llavero rojo",
-  },
-  {
-    id: 10,
-    status: "found",
-    imageUrl: "",
-    altText: "Lentes",
-    title: "Lentes de armazón negro",
-    date: "16/May/2024",
-    location: "Encontrados en la cafetería",
-  },
-  {
-    id: 11,
-    status: "found",
-    imageUrl: "",
-    altText: "Llaves",
-    title: "Llaves cerca de la Biblioteca",
-    date: "15/May/2024",
-    location: "Llavero rojo",
-  },
-  {
-    id: 12,
-    status: "found",
-    imageUrl: "",
-    altText: "Lentes",
-    title: "Lentes de armazón negro",
-    date: "16/May/2024",
-    location: "Encontrados en la cafetería",
-  }
-];
+import { useSchemas } from "@/hooks/useSchemas"; 
 
 const Home = () => {
+  // guardaremos lo que baje de la base de datos
+  const [dbObjects, setDbObjects] = useState<CardProps[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Hook para bajar datos de Supabase
+  const { getPosts } = useSchemas();
+
+  useEffect(() => {
+    const fetchObjects = async () => {
+      try {
+        setLoading(true);
+        const rawPosts: Post[] = await getPosts();
+
+        const formattedObjects: CardProps[] = rawPosts.map((post) => ({
+          id: post.id,
+          // Mapeamos el ID numérico a string 'lost' o 'found'
+          // Asumimos: 1 = Perdido, 2 = Encontrado
+          status: post.post_state_id === 1 ? "lost" : "found",
+          imageUrl: post.photo_url || "",
+          altText: post.title,
+          title: post.title,
+          date: new Date(post.date_was_found || post.created_at).toLocaleDateString(),
+          location: post.location || "Sin ubicación",
+        }));
+
+        setDbObjects(formattedObjects);
+      } catch (error) {
+        console.error("Error cargando objetos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchObjects();
+  }, []); // Array vacío = Solo se ejecuta una vez al inicio
+
+  // Pasamos los datos REALES (dbObjects) a tu hook de filtros
   const {
     searchObj,
     setSearchObj,
     sortBy,
     setSortBy,
     filteredObjects
-  } = useObjectFilter(objects); // Custom Hook para lógica de filtrado y ordenamiento
+  } = useObjectFilter(dbObjects); 
   
+  // Separamos las listas para las columnas izquierda/derecha
   const lostItems = filteredObjects.filter(obj => obj.status === 'lost');
   const foundItems = filteredObjects.filter(obj => obj.status === 'found');
+
+  if (loading) {
+    return (
+      <Box minH="100vh">
+        <PresentationSection />
+        <Center py={20}>
+          <Spinner size="xl" color="brand.blue" thickness="4px" />
+        </Center>
+      </Box>
+    );
+  }
 
   return(
     <Box>

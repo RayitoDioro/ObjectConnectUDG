@@ -4,12 +4,13 @@ import type { FullCardProps } from "@/types";
 
 interface UserPostsListProps {
   posts: FullCardProps[];
-  isOwner: boolean;                 // ¿Es el dueño del perfil?
-  onMarkFound: (id: number) => void; // Función para marcar encontrado
-  onDelete: (id: number) => void;    // Función para borrar
+  isOwner: boolean;
+  onMarkFound: (id: number) => void;
+  onMarkLost: (id: number) => void; 
+  onDelete: (id: number) => void;
 }
 
-const UserPostsList = ({ posts, isOwner, onMarkFound, onDelete }: UserPostsListProps) => {
+const UserPostsList = ({ posts, isOwner, onMarkFound, onMarkLost, onDelete }: UserPostsListProps) => {
   
   if (posts.length === 0) {
     return (
@@ -23,10 +24,8 @@ const UserPostsList = ({ posts, isOwner, onMarkFound, onDelete }: UserPostsListP
   return (
     <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6} p={4}>
       {posts.map((post) => (
-        // Botones pora la tarjeta de encontrado o borrado
         <Box key={post.id} position="relative" display="flex" flexDirection="column" gap={2}>
           
-          {/* Tu Card Original */}
           <Card
             status={post.status}
             imageUrl={post.imageUrl}
@@ -36,31 +35,41 @@ const UserPostsList = ({ posts, isOwner, onMarkFound, onDelete }: UserPostsListP
             location={post.location}
           />
 
-          {/* (Solo visible para el dueño) */}
+          {/* PANEL DE CONTROL DEL DUEÑO */}
           {isOwner && (
             <HStack width="100%" justifyContent="space-between">
               
-              {/* Botón Marcar Encontrado (Solo aparece si NO está encontrado ya) */}
-              {post.status !== 'found' && (
+              {/* LÓGICA DE BOTONES ALTERNADOS */}
+              {post.status === 'found' ? (
+                // SI YA ESTÁ ENCONTRADO -> Muestra botón para volver a PERDIDO
+                <Button 
+                  size="sm" 
+                  colorScheme="orange" 
+                  flex={1}
+                  onClick={() => onMarkLost(post.id)}
+                >
+                  Volver a publicar
+                </Button>
+              ) : (
+                // SI ESTÁ PERDIDO -> Muestra botón para marcar ENCONTRADO
                 <Button 
                   size="sm" 
                   colorScheme="green" 
                   flex={1}
                   onClick={() => onMarkFound(post.id)}
                 >
-                  ¡Objeto Encontrado!
+                  Marcar como encontrado
                 </Button>
               )}
 
-              {/* Botón Eliminar (Siempre aparece) */}
+              {/* Botón Eliminar (Siempre visible) */}
               <Button 
                 size="sm" 
                 colorScheme="red" 
                 variant="outline"
-                flex={post.status === 'found' ? 1 : 0} // Se estira si es el único botón
                 onClick={() => onDelete(post.id)}
               >
-                X
+                Eliminar
               </Button>
             </HStack>
           )}
