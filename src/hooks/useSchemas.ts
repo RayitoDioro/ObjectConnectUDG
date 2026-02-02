@@ -5,7 +5,12 @@ export type PostPayload = {
     description: string;
     foundWhere?: string;
     dateFound?: string | null;
-    category?: string;
+    product_category_id?: number;
+};
+
+export type Category = {
+    id: number;
+    name: string;
 };
 
 /**
@@ -53,6 +58,7 @@ export function useSchemas() {
                 user_id: userId,
                 post_state_id: 1,
                 date_was_found: payload.dateFound ?? null,
+                product_category_id: payload.product_category_id ?? null,
             };
 
             const { data: inserted, error: insertError } = await supabaseClient
@@ -74,6 +80,15 @@ export function useSchemas() {
         if (error) throw error;
 
         return data;
+    }
+
+    async function getCategories(): Promise<Category[]> {
+        const { data, error } = await supabaseClient.from('categories').select('id, name');
+        if (error) {
+            console.error('Error fetching categories:', error);
+            throw error;
+        }
+        return (data ?? []) as Category[];
     }
 
     /**
@@ -98,5 +113,5 @@ export function useSchemas() {
         }
     }
 
-    return { uploadPostWithImage, getPosts, getUserById };
+    return { uploadPostWithImage, getPosts, getCategories, getUserById };
 }

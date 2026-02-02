@@ -22,10 +22,10 @@ import {
   AlertDescription,
 } from "@chakra-ui/react";
 import { AttachmentIcon, DeleteIcon } from "@chakra-ui/icons";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useSchemas, type PostPayload } from "../../../hooks/useSchemas";
-import type { AlertMessage } from "@/types";
+import type { AlertMessage, Category } from "@/types";
 
 const PublishObject = () => {
   // 2. Estado para guardar los archivos seleccionados
@@ -35,9 +35,23 @@ const PublishObject = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const { session } = useAuth();
-  const { uploadPostWithImage } = useSchemas();
+  const { uploadPostWithImage, getCategories } = useSchemas();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        if (data) setCategories(data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        showAlert("error", "Error", "No se pudieron cargar las categorías.");
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Función para mostrar alertas
   const showAlert = (type: "success" | "error", title: string, description: string) => {
@@ -82,10 +96,12 @@ const PublishObject = () => {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
+    const categoryId = formData.get('category');
+
     const data: PostPayload = {
       title: String(formData.get('title') || ''),
       description: String(formData.get('description') || ''),
-      category: String(formData.get('category') || ''),
+      product_category_id: categoryId ? Number(categoryId) : undefined,
       foundWhere: String(formData.get('foundWhere') || '') || undefined,
       dateFound: String(formData.get('dateFound') || '') || null,
     };
@@ -94,7 +110,7 @@ const PublishObject = () => {
     const newErrors: Record<string, string> = {};
     if (!data.title) newErrors.title = "El título es obligatorio.";
     if (!data.description) newErrors.description = "La descripción es obligatoria.";
-    if (!data.category) newErrors.category = "La categoría es obligatoria.";
+    if (!data.product_category_id) newErrors.category = "La categoría es obligatoria.";
     if (!data.foundWhere) newErrors.foundWhere = "El lugar donde lo encontraste es obligatorio.";
     if (!data.dateFound) {
       newErrors.dateFound = "La fecha es obligatoria.";
@@ -243,11 +259,11 @@ const PublishObject = () => {
                 <FormControl isRequired isInvalid={!!errors.category}>
                   <FormLabel fontWeight="600">Categoría</FormLabel>
                   <Select name="category" placeholder="Selecciona una categoría">
-                    <option>Electrónicos</option>
-                    <option>Libros y Libretas</option>
-                    <option>Credenciales</option>
-                    <option>Ropa y Accesorios</option>
-                    <option>Otros</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
                   </Select>
                 </FormControl>
                 <FormControl isRequired isInvalid={!!errors.foundWhere}>

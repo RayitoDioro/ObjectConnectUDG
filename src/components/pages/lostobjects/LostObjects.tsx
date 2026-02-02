@@ -22,7 +22,7 @@ import {
     Link as ChakraLink
 } from '@chakra-ui/react';
 import { useLostObjects } from './hooks/useLostObjects';
-import type { FullCardProps } from '../../../types'; // Corregido para que apunte a la ruta correcta
+import type { FullCardProps, Category } from '../../../types'; // Corregido para que apunte a la ruta correcta
 import { ObjectList } from './subComponents/ObjectList';
 import { useAuth } from '@/context/AuthContext';
 import { useSchemas as useLostObjectPageSchemas } from './hooks/useSchemas';
@@ -35,7 +35,7 @@ export default function LostObjects() {
     const { profile } = useAuth();
     const navigate = useNavigate();
     const { createThreaForPost, threads } = useLostObjectPageSchemas();
-    const { getUserById } = useSchemas();
+    const { getUserById, getCategories } = useSchemas();
     const { lostObjects, possibleMatches, getPossibleMatches } = useLostObjects();
 
     // Estado para guardar el objeto seleccionado y mostrar sus detalles
@@ -43,6 +43,19 @@ export default function LostObjects() {
         lostObjects[0] ?? null
     );
     const [selectedPostUser, setSelectedPostUser] = useState<any | null>(null);
+    const [categories, setCategories] = useState<Category[]>([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const data = await getCategories();
+                setCategories(data);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        };
+        fetchCategories();
+    }, [getCategories]);
 
     useEffect(() => {
         if (selectedObject?.userId) {
@@ -206,6 +219,11 @@ export default function LostObjects() {
 
                                 {/* 3. Imagen del objeto */}
                                 <Image src={selectedObject.imageUrl} alt={selectedObject.altText} borderRadius="md" maxH="300px" w="100%" objectFit="contain" bg="gray.100" />
+
+                                {/* 4. Nombre de la categoría */}
+                                <Text textAlign="right" fontSize="sm" color="gray.600">
+                                    {categories.find(cat => cat.id === selectedObject.categoryId)?.name || 'Sin categoría'}
+                                </Text>
 
                                 <Divider />
 

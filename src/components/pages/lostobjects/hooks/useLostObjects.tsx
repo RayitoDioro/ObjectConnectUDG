@@ -50,6 +50,7 @@ export const useLostObjects = () => {
                             userId: post.user_id,
                             authorName: userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : 'Usuario Anónimo',
                             authorAvatarUrl: userProfile?.photo_profile_url || null,
+                            categoryId: post.product_category_id || 0,
                         };
                     });
                     setLostObjects(mappedPosts);

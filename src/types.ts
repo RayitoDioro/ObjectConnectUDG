@@ -4,6 +4,11 @@ export type Thread = {
   post_id: number | null;
 };
 
+export type Category = {
+  id: number;
+  name: string;
+};
+
 export type Message = {
   id: number;
   thread_id: number;
@@ -47,6 +52,7 @@ export type FullCardProps = {
   userId: string;
   authorName: string;
   authorAvatarUrl: string | null;
+  categoryId: number;
 };
 
 export type Post = {
@@ -59,6 +65,7 @@ export type Post = {
     user_id: string;
     post_state_id: number;
     date_was_found: string | null;
+    product_category_id?: number;
 };
 
 
