@@ -12,6 +12,9 @@ import { AuthProvider } from './context/AuthContext.tsx';
 import { ProtectedRoute } from './components/common/ProtectedRoute.tsx';
 import Chats from './components/pages/chats/Chats.tsx';
 import ProfileSettings from './ProfileSettings';
+import { ProtectedRouteAdmin } from './components/common/ProtectedRouteAdmin.tsx';
+import { AdminDashboard } from './components/pages/admin/AdminDashboard.tsx';
+import { AdminLayout } from './layouts/AdminLayout.tsx';
 
 function App() {
   // Elimina el useAuth aquí, solo usa el Provider
@@ -67,6 +70,46 @@ function App() {
               <ProtectedRoute>
                 <MainLayout><ProfileSettings /></MainLayout>
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/admin'
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <AdminDashboard/>
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/usuarios"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <div>Gestionar Usuarios</div>
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/roles"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <div>Gestionar Roles</div>
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/posts"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <div>Gestionar Posts</div>
+                </AdminLayout>
+              </ProtectedRouteAdmin>
             }
           />
           <Route path="/login" element={<Login />} />
