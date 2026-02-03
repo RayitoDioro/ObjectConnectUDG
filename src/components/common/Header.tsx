@@ -4,10 +4,10 @@ import { supabaseClient } from '@/supabaseClient';
 
 import udgLogo from '../../assets/logoUDG.png';
 import { Box, Flex, Image, Button, MenuButton, Menu, MenuList, MenuItem, Avatar, HStack, Link, IconButton, useDisclosure, Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerBody, VStack, Divider } from '@chakra-ui/react';
-import { HamburgerIcon } from '@chakra-ui/icons';
+import { HamburgerIcon, SettingsIcon } from '@chakra-ui/icons';
 
 const Header = () => {
-  const { session, profile } = useAuth();
+  const { session, profile, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   // Hook 
@@ -17,6 +17,10 @@ const Header = () => {
   const handleLogout = async () => {
     await supabaseClient.auth.signOut();
     navigate('/');
+  };
+
+  const handleAdminClick = () => {
+    navigate('/admin');
   };
 
   const linkHoverStyle = {
@@ -56,7 +60,13 @@ const Header = () => {
             {
               session ? (
                 <Menu>
-                  <MenuButton as={Button} rounded='full' variant='link' cursor='pointer' >
+                  <MenuButton 
+                    as={Button} 
+                    rounded='full' 
+                    variant='link' 
+                    cursor='pointer' 
+                    _hover={{transform: 'scale(1.1)' }}
+                  >
                     <Box
                       border="4px solid"
                       borderRadius="full"
@@ -94,6 +104,20 @@ const Header = () => {
               )
             }
           </Box>
+          {/* Botón admin - solo aparece si sesión iniciada y es un admin */}
+          {session && isAdmin && (
+            <IconButton
+              aria-label='Panel Administrativo'
+              icon={<SettingsIcon/>}
+              onClick={handleAdminClick}
+              bg='brand.yellow'
+              color='brand.blue'
+              _hover={{ bg: 'brand.yellowTwo', transform: 'scale(1.1)' }}
+              _active={{ transform: 'scale(0.95)' }}
+              display={{ base: 'none', md: 'flex' }}
+              title='Panel Administrativo'
+            />
+          )}
 
           {/* Botón de hamburguesa para móvil (se oculta en escritorio) */}
           <IconButton
@@ -105,6 +129,7 @@ const Header = () => {
             display={{ base: 'flex', md: 'none' }}
             onClick={onDrawerOpen}
           />
+
         </HStack>
       </Flex>
 
@@ -127,6 +152,12 @@ const Header = () => {
               {
                 session ? (
                   <>
+                    {isAdmin && (
+                      <>
+                        <Link as={RouterLink} to='/admin' onClick={onDrawerClose} fontSize='lg' fontWeight='bold' color='brand.yellow' _hover={{ textDecoration: 'double', opacity: 0.6}}>Panel Administrativo</Link>
+                        <Divider/>
+                      </>
+                    )}
                     <Link as={RouterLink} to='/perfil' onClick={onDrawerClose} fontSize='lg' fontWeight='bold' _hover={{ textDecoration: 'double', opacity: 0.6}}>Mi perfil</Link>
                     <Link as={RouterLink} to='/settings' onClick={onDrawerClose} fontSize='lg' fontWeight='bold' _hover={{ textDecoration: 'double', opacity: 0.6}}>
                       Configuración
