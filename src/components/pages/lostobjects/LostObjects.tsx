@@ -19,7 +19,6 @@ import {
     Divider,
     Text,
     Image,
-    Link as ChakraLink
 } from '@chakra-ui/react';
 import { useLostObjects } from './hooks/useLostObjects';
 import type { FullCardProps, Category } from '../../../types'; // Corregido para que apunte a la ruta correcta
@@ -34,9 +33,9 @@ import { useNavigate, Link as RouterLink } from 'react-router-dom';
 export default function LostObjects() {
     const { profile } = useAuth();
     const navigate = useNavigate();
-    const { createThreaForPost, threads } = useLostObjectPageSchemas();
+    const { createThreaForPost } = useLostObjectPageSchemas();
     const { getUserById, getCategories } = useSchemas();
-    const { lostObjects, possibleMatches, getPossibleMatches } = useLostObjects();
+    const { lostObjects, possibleMatches, getPossibleMatches, clearSearch, isLoadingMatches } = useLostObjects();
 
     // Estado para guardar el objeto seleccionado y mostrar sus detalles
     const [selectedObject, setSelectedObject] = useState<FullCardProps | null>(
@@ -75,11 +74,11 @@ export default function LostObjects() {
     }, [selectedObject, getUserById]);
 
     // Estado para los filtros (aún no implementada la lógica de filtrado)
-    const [titleFilter, setTitleFilter] = useState('');
-    const [featuresFilter, setFeaturesFilter] = useState('');
+    const [titleFilter, setTitleFilter] = useState(sessionStorage.getItem('searchTitle') || '');
+    const [featuresFilter, setFeaturesFilter] = useState(sessionStorage.getItem('searchDescription') || '');
 
     // Estado para controlar si ya se ha establecido un objetivo
-    const [isTargetSet, setIsTargetSet] = useState(false);
+    const [isTargetSet, setIsTargetSet] = useState(!!sessionStorage.getItem('searchTitle') || !!sessionStorage.getItem('searchDescription'));
 
     const { isOpen, onOpen, onClose } = useDisclosure()
     const handleCardClick = (object: FullCardProps) => {
@@ -88,15 +87,15 @@ export default function LostObjects() {
         onOpen();
     };
 
-    const handleTargetObjectFormClick = (title: string, features: string) => {
-        getPossibleMatches(title, features);
+    const handleTargetObjectFormClick = async (title: string, features: string) => {
+        await getPossibleMatches(title, features);
         setIsTargetSet(true);
     }
 
     const handleRemoveTargetClick = () => {
         setTitleFilter('');
         setFeaturesFilter('');
-        getPossibleMatches('', ''); // Call with empty strings to clear the matches
+        clearSearch();
         setIsTargetSet(false);
     }
 
@@ -147,6 +146,7 @@ export default function LostObjects() {
                         <Button
                             bg="#00569c" 
                             color="white"
+                            isLoading={isLoadingMatches}
                             _hover={{
                                 boxShadow: 'lg',
                                 bg: '#1A3258' 
