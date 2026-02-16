@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { FullCardProps, Post, UserProfile } from "@/types";
 import { useSchemas } from "../../../../hooks/useSchemas";
 import { supabaseClient } from "@/supabaseClient";
+import { useAuth } from "../../../../context/AuthContext";
 
 const SEARCH_API_URL = "/api-proxy/buscar";
 const SIMILARITY_THRESHOLD = 0.3;
@@ -9,11 +10,13 @@ const SEARCH_TIMEOUT_MS = 90000; // 90 seconds timeout for Render cold start
 
 export const useLostObjects = () => {
     const { getPosts } = useSchemas();
+    const { session } = useAuth();
 
     const [lostObjects, setLostObjects] = useState<FullCardProps[]>([]);
     const [possibleMatches, setPossibleMatches] = useState<FullCardProps[]>([]);
     const [filteredObjects, setFilteredObjects] = useState<FullCardProps[]>([]);
     const [isLoadingMatches, setIsLoadingMatches] = useState(false);
+    const [searchError, setSearchError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchLostObjects = async () => {
@@ -85,19 +88,21 @@ export const useLostObjects = () => {
     const performSearch = useCallback(async (title: string, features: string, objectsToFilter: FullCardProps[]) => {
          if (!title && !features) {
             setPossibleMatches([]);
+            setSearchError(null);
             return;
         }
         
         setIsLoadingMatches(true);
+        setSearchError(null);
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), SEARCH_TIMEOUT_MS);
 
         try {
-            console.log(`Searching for: ${title}, ${features}`);
             const response = await fetch(SEARCH_API_URL, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session?.access_token}`,
                     // 'Accept': 'application/json' 
                 },
                 body: JSON.stringify({ 
@@ -111,18 +116,25 @@ export const useLostObjects = () => {
             clearTimeout(timeoutId);
 
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Search API failed: ${response.status} ${errorText}`);
+                const errorData = await response.json().catch(() => ({}));
+                let errorMessage = "Ocurrió un error al buscar posibles matches. Inténtalo de nuevo más tarde.";
+                
+                if (errorData.detail === "Unauthorized") {
+                    errorMessage = "Tu sesión ha expirado o es inválida. Por favor, intenta iniciar sesión de nuevo.";
+                    console.error("Error de autorización: El token de Supabase es inválido o ha expirado.");
+                }
+                
+                setSearchError(errorMessage);
+                throw new Error(`Search API failed: ${response.status} ${JSON.stringify(errorData)}`);
             }
             
             const data = await response.json();
-            console.log("Search results:", data);
             
             const matchesData = data.matches || [];
             const matchIds = matchesData.map((m: any) => m.id);
 
             // Filter and Sort
-            // Note: If objectsToFilter is empty (e.g. not loaded yet), this returns empty.
+            // If objectsToFilter is empty (not loaded yet), this returns empty.
             // But usually this is called when user interacts, so objects should be loaded.
             const matches = objectsToFilter.filter(obj => matchIds.includes(obj.id));
             
@@ -136,16 +148,18 @@ export const useLostObjects = () => {
         } catch (error: any) {
             if (error.name === 'AbortError') {
                 console.error("Search request timed out");
+                setSearchError("La búsqueda tardó demasiado. Inténtalo de nuevo.");
             } else {
                 console.error("Search error:", error);
+                // Solo establecemos un error genérico si no se ha establecido uno específico antes
+                setSearchError((prev) => prev || "Error de conexión con el servidor de búsqueda.");
             }
             setPossibleMatches([]);
         } finally {
-            console.log("Search finished, setting loading to false");
             setIsLoadingMatches(false);
             clearTimeout(timeoutId); // Ensure cleanup
         }
-    }, []);
+    }, [session]);
 
     const getPossibleMatches = async (title: string, features: string) => {
         sessionStorage.setItem('searchTitle', title);
@@ -173,12 +187,30 @@ export const useLostObjects = () => {
         }
     }, [lostObjects, performSearch]);
 
-    return {
-        lostObjects: filteredObjects,
-        possibleMatches,
-        getPossibleMatches, 
-        filterObjectsByTerm,
-        clearSearch,
-        isLoadingMatches
+        return {
+
+            lostObjects: filteredObjects,
+
+            possibleMatches,
+
+            getPossibleMatches, 
+
+            filterObjectsByTerm,
+
+            clearSearch: () => {
+
+                clearSearch();
+
+                setSearchError(null);
+
+            },
+
+            isLoadingMatches,
+
+            searchError
+
+        }
+
     }
-}
+
+    

@@ -19,6 +19,10 @@ import {
     Divider,
     Text,
     Image,
+    Alert,
+    AlertIcon,
+    AlertTitle,
+    AlertDescription,
 } from '@chakra-ui/react';
 import { useLostObjects } from './hooks/useLostObjects';
 import type { FullCardProps, Category } from '../../../types'; // Corregido para que apunte a la ruta correcta
@@ -35,7 +39,7 @@ export default function LostObjects() {
     const navigate = useNavigate();
     const { createThreaForPost } = useLostObjectPageSchemas();
     const { getUserById, getCategories } = useSchemas();
-    const { lostObjects, possibleMatches, getPossibleMatches, clearSearch, isLoadingMatches } = useLostObjects();
+    const { lostObjects, possibleMatches, getPossibleMatches, clearSearch, isLoadingMatches, searchError } = useLostObjects();
 
     // Estado para guardar el objeto seleccionado y mostrar sus detalles
     const [selectedObject, setSelectedObject] = useState<FullCardProps | null>(
@@ -151,18 +155,30 @@ export default function LostObjects() {
                                 boxShadow: 'lg',
                                 bg: '#1A3258' 
                             }}
-                            isDisabled={isTargetSet || !titleFilter || !featuresFilter}
+                            // Se bloquea si ya hay un objetivo puesto o si los campos están vacíos
+                            isDisabled={isTargetSet || !titleFilter.trim() || !featuresFilter.trim()}
                             onClick={() => handleTargetObjectFormClick(titleFilter, featuresFilter)}
                         >
                             Establecer objetivo
                         </Button>
                         <Button
                             colorScheme="red" 
-                            isDisabled={!isTargetSet}
+                            isDisabled={!isTargetSet || isLoadingMatches}
                             onClick={handleRemoveTargetClick}
                         >
                             Remover objetivo
                         </Button>
+                        {searchError && (
+                            <Alert status="error" borderRadius="md" variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center">
+                                <AlertIcon />
+                                <AlertTitle mt={2} mb={1} fontSize="sm">
+                                    Error de búsqueda
+                                </AlertTitle>
+                                <AlertDescription fontSize="xs">
+                                    {searchError}
+                                </AlertDescription>
+                            </Alert>
+                        )}
                     </VStack>
                 </Box>
             </GridItem>
