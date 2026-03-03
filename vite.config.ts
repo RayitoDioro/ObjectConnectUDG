@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api-proxy': {
-        target: 'https://objectconnectudg-fastapi-microservice.onrender.com',
+        target: 'https://fastapimicroserviceforsearch.fly.dev/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-proxy/, ''),
       },

@@ -194,8 +194,8 @@ export default function LostObjects() {
                 />
             </GridItem>
 
-            {/* Columna 3: Detalles del Objeto */}
-            <GridItem as="article">
+            {/* Columna 3: Posibles Matches */}
+            <GridItem as="article" overflowY="auto" maxH="calc(100vh - 200px)">
                 <ObjectList
                     title="Posibles matches"
                     items={possibleMatches}
