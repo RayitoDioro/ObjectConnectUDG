@@ -1,8 +1,12 @@
 import { Box, Text, Heading, Flex, SimpleGrid } from "@chakra-ui/react";
 import Card from '../../../ui/Card';
-import { type ObjectGridProps } from "@/types";
+import { type ObjectGridProps, type CardProps } from "@/types";
 
-const ObjectGrid = ({lostItems, foundItems, searchObj}: ObjectGridProps) => {
+interface CustomGridProps extends ObjectGridProps {
+  onCardClick: (obj: CardProps) => void;
+}
+
+const ObjectGrid = ({lostItems, foundItems, searchObj, onCardClick}: CustomGridProps) => {
     return(
         <>
             {/* Objetos */}
@@ -26,7 +30,16 @@ const ObjectGrid = ({lostItems, foundItems, searchObj}: ObjectGridProps) => {
                     ) : (
                     <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                         {lostItems.map((obj) => (
-                        <Card key={obj.id} {...obj} />
+                        // Envolvemos la Card en un Box clickeable con efecto hover
+                        <Box 
+                            key={obj.id} 
+                            onClick={() => onCardClick(obj)}
+                            cursor="pointer"
+                            transition="transform 0.2s"
+                            _hover={{ transform: 'scale(1.03)', zIndex: 1 }}
+                        >
+                            <Card {...obj} />
+                        </Box>
                         ))}
                     </SimpleGrid>
                     )
@@ -52,7 +65,16 @@ const ObjectGrid = ({lostItems, foundItems, searchObj}: ObjectGridProps) => {
                     ) : (
                     <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                         {foundItems.map((obj) => (
-                        <Card key={obj.id} {...obj} />
+                        // 2. Envolvemos la Card en un Box clickeable con efecto hover
+                        <Box 
+                            key={obj.id} 
+                            onClick={() => onCardClick(obj)}
+                            cursor="pointer"
+                            transition="transform 0.2s"
+                            _hover={{ transform: 'scale(1.03)', zIndex: 1 }}
+                        >
+                            <Card {...obj} />
+                        </Box>
                         ))}
                     </SimpleGrid>
                     )
