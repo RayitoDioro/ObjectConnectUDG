@@ -95,3 +95,10 @@ export type AlertMessage = {
   title: string;
   description: string;
 };
+
+export type Statistics = {
+  totalUsers: number;
+  totalRoles: number;
+  totalPosts: number;
+  activeUsers: number;
+};
