@@ -15,6 +15,7 @@ import ProfileSettings from './ProfileSettings';
 import { ProtectedRouteAdmin } from './components/common/ProtectedRouteAdmin.tsx';
 import { AdminDashboard } from './components/pages/admin/AdminDashboard.tsx';
 import { AdminLayout } from './layouts/AdminLayout.tsx';
+import { UsersTable } from './components/pages/admin/users/UsersTable.tsx';
 
 function App() {
   // Elimina el useAuth aquí, solo usa el Provider
@@ -87,7 +88,7 @@ function App() {
             element={
               <ProtectedRouteAdmin>
                 <AdminLayout>
-                  <div>Gestionar Usuarios</div>
+                  <UsersTable />
                 </AdminLayout>
               </ProtectedRouteAdmin>
             }

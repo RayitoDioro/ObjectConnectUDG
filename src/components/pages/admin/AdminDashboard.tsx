@@ -30,8 +30,6 @@ export const AdminDashboard = () => {
             .from('Roles')
             .select('*', { count: 'exact', head: true });
 
-            console.log('roles count: ' + rolesCount);
-
             // posts totales
             const {count: postsCount} = await supabaseClient
             .from('posts')
@@ -45,8 +43,6 @@ export const AdminDashboard = () => {
             .from('user_profile')
             .select('*', {count: 'exact', head: true})
             .gte('creation_date', sevenDaysAgo);
-
-            console.log('users count: ' + activeUsersCount);
 
             setStats({
               totalUsers: usersCount || 0,
@@ -137,7 +133,7 @@ export const AdminDashboard = () => {
               _hover={{ bg: 'brand.yellowTwo' }}
               w={{ base: '100%', sm: 'auto' }}
             >
-              Gestionar Usuarios
+              Roles de Usuarios
             </Button>
             
             <Button 
