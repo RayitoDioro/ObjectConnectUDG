@@ -28,8 +28,15 @@ export type UserProfile = {
   last_name: string;
   photo_profile_url: string | null;
   role_id: number | null;
-  role_name: string | null;
 };
+
+export type Role = {
+  id: number;
+  role_name: string;
+}
+
+export type UserWithRole = 
+  UserProfile & { Roles?: { id: number; role_name: string } };
 
 export type CardProps = {
   id: number;
@@ -103,8 +110,3 @@ export type Statistics = {
   totalPosts: number;
   activeUsers: number;
 };
-
-export type Role = {
-  id: number;
-  role_name: string;
-}

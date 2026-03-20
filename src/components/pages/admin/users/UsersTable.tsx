@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Flex,
   HStack,
   Icon,
   IconButton,
@@ -15,22 +16,26 @@ import {
   useToast,
   Heading,
   VStack,
-  Input
+  Input,
+  Spinner
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabaseClient } from '@/supabaseClient';
-import { type UserProfile } from '@/types';
-import { FiEdit, FiTrash2, FiPlus } from 'react-icons/fi';
+import { type UserWithRole } from '@/types';
+import { FiEdit, FiTrash2, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { UserFormModal } from './UserFormModal';
 import { DeleteConfirmationModal } from '../common/DeleteConfirmationModal';
 
-type UserWithRole = UserProfile & { role_name?: string };
+// Constantes
+const USERS_PAGE_SIZE = 2;
 
 export const UsersTable = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const toast = useToast();
 
   const {
@@ -45,55 +50,84 @@ export const UsersTable = () => {
     onClose: onDeleteClose,
   } = useDisclosure();
 
+  // Calcular páginas totales
+  const totalPages = Math.ceil(totalCount / USERS_PAGE_SIZE);
+
   // Cargar usuarios
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabaseClient
+
+      // Calculo del offset
+      const offset = (currentPage - 1) * USERS_PAGE_SIZE;
+
+      let query = supabaseClient
         .from('user_profile')
         .select(`
-          *,
-          Roles(id, role_name)
-        `);
+          user_id,
+          first_name,
+          last_name,
+          photo_profile_url,
+          role_id,
+          Roles!inner(id, role_name)
+        `,
+        { count: 'exact' }
+      ).order('creation_date', { ascending: false })
+      .range(offset, offset + USERS_PAGE_SIZE - 1);
+      
+      if (searchTerm.trim()) {
+        query = query.or(
+          `first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`
+        );
+      }
+
+      const { data, error, count } = await query as unknown as {
+        data: UserWithRole[] | null;
+        error: unknown;
+        count: number | null;
+      };
 
       if (error) {
         console.error('Error fetching users:', error);
         throw error;
       }
 
-      setUsers(
-        (data || []).map((user: any) => ({
-            user_id: user.user_id,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            role_id: user.role_id,
-            photo_profile_url: user.photo_profile_url,
-            role_name: user.Roles.role_name || 'N/A',
-        }))
-      );
+      setTotalCount(count || 0);
+
+       // Transformar datos de forma segura
+      const transformedUsers = (data || []).map((user: UserWithRole) => ({
+        user_id: user.user_id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        photo_profile_url: user.photo_profile_url,
+        role_id: user.role_id,
+        Roles: user.Roles,
+        role_name: user.Roles?.role_name || 'Sin rol'
+      }));
+
+      setUsers(transformedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
         title: 'Error',
         description: 'No se pudieron cargar los usuarios',
         status: 'error',
+        duration: 3000
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, currentPage, toast]);
 
+  // Resetear a página 1 cuando cambia búsqueda
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // Ejecutar fetch cuando cambie página o búsqueda
   useEffect(() => {
     fetchUsers();
-  }, []);
-
-  // Filtrar usuarios
-  const filteredUsers = users.filter(
-    (user) =>
-      user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.user_id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  }, [fetchUsers]);
 
   const handleEdit = (user: UserWithRole) => {
     setSelectedUser(user);
@@ -105,22 +139,28 @@ export const UsersTable = () => {
     onDeleteOpen();
   };
 
+  // Usar función RPC para eliminar usuario completo
   const handleConfirmDelete = async () => {
     if (!selectedUser) return;
 
     try {
-      const { error } = await supabaseClient
-        .from('user_profile')
-        .delete()
-        .eq('user_id', selectedUser.user_id);
+      // Usar función RPC en lugar de query directa, 
+      // esto ejecuta la función SQL en Supabase
+      const { error } = await supabaseClient.rpc('delete_user_complete', {
+        user_id_input: selectedUser.user_id,
+      });
 
       if (error) throw error;
 
+      // Actualizar estado local
       setUsers(users.filter((u) => u.user_id !== selectedUser.user_id));
+      setTotalCount(totalCount - 1);
+
       toast({
         title: 'Éxito',
         description: 'Usuario eliminado correctamente',
         status: 'success',
+        duration: 3000
       });
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -128,6 +168,7 @@ export const UsersTable = () => {
         title: 'Error',
         description: 'No se pudo eliminar el usuario',
         status: 'error',
+        duration: 3000
       });
     } finally {
       onDeleteClose();
@@ -153,25 +194,13 @@ export const UsersTable = () => {
       {/* Controles */}
       <HStack spacing={4} wrap="wrap">
         <Input
-          placeholder="Buscar por nombre o email..."
+          placeholder="Buscar por nombre o apellido..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           w={{ base: '100%', md: '300px' }}
           bg="white"
+          isDisabled={loading}
         />
-        <Button
-          leftIcon={<Icon as={FiPlus} />}
-          bg="brand.yellow"
-          color="brand.blue"
-          fontWeight="bold"
-          _hover={{ bg: 'brand.yellowTwo' }}
-          onClick={() => {
-            setSelectedUser(null);
-            onFormOpen();
-          }}
-        >
-          Nuevo Usuario
-        </Button>
       </HStack>
 
       {/* Tabla */}
@@ -179,33 +208,48 @@ export const UsersTable = () => {
         <Table>
           <Thead bg="brand.blue">
             <Tr>
-              <Th color="white">Nombre</Th>
-              <Th color="white">Rol</Th>
-              <Th color="white">Acciones</Th>
+              <Th color="white" textAlign="center">Nombre</Th>
+              <Th color="white" textAlign="center">Rol</Th>
+              <Th color="white" textAlign="center">Acciones</Th>
             </Tr>
           </Thead>
           <Tbody>
             {loading ? (
               <Tr>
-                <Td colSpan={4} textAlign="center" py={8}>
-                  <Text>Cargando...</Text>
+                <Td colSpan={3} textAlign="center" py={8}>
+                  <Spinner color="brand.yellow" />
                 </Td>
               </Tr>
-            ) : filteredUsers.length === 0 ? (
+            ) : users.length === 0 ? (
               <Tr>
-                <Td colSpan={4} textAlign="center" py={8}>
-                  <Text>No hay usuarios</Text>
+                <Td colSpan={3} textAlign="center" py={8}>
+                  <Text color="gray.500">No hay usuarios</Text>
                 </Td>
               </Tr>
             ) : (
-              filteredUsers.map((user) => (
+              users.map((user) => (
                 <Tr key={user.user_id} _hover={{ bg: 'gray.50' }}>
-                  <Td fontWeight="bold" color="brand.blue">
+                  <Td fontWeight="bold" color="brand.blue" textAlign="center">
                     {user.first_name} {user.last_name}
                   </Td>
-                  <Td>{user.role_name}</Td>
+                  <Td textAlign="center">
+                    <Flex justify="center">
+                      <Box
+                        px={4}
+                        py={2}
+                        borderRadius="full"
+                        bg="brand.lightGray"
+                        color="brand.darkGrayText"
+                        fontWeight="600"
+                        fontSize="sm"
+                        w="fit-content"
+                      >
+                        {user.Roles?.role_name}
+                      </Box>
+                    </Flex>
+                  </Td>
                   <Td>
-                    <HStack spacing={2}>
+                    <HStack spacing={2} justify="center">
                       <IconButton
                         aria-label="Editar"
                         icon={<Icon as={FiEdit} />}
@@ -231,6 +275,56 @@ export const UsersTable = () => {
         </Table>
       </Box>
 
+      {/* Paginación */}
+      <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
+        <HStack spacing={2}>
+          <IconButton
+            aria-label="Página anterior"
+            icon={<Icon as={FiChevronLeft} />}
+            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+            isDisabled={currentPage === 1 || loading}
+            bg="brand.yellow"
+            color="brand.blue"
+            _hover={{ bg: 'brand.yellowTwo' }}
+          />
+          
+          {/* Botones de páginas */}
+          <HStack spacing={1}>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                bg={currentPage === page ? 'brand.blue' : 'gray.200'}
+                color={currentPage === page ? 'white' : 'black'}
+                fontWeight={currentPage === page ? 'bold' : 'normal'}
+                size="sm"
+                isDisabled={loading}
+              >
+                {page}
+              </Button>
+            ))}
+          </HStack>
+
+          <IconButton
+            aria-label="Página siguiente"
+            icon={<Icon as={FiChevronRight} />}
+            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+            isDisabled={currentPage === totalPages || loading}
+            bg="brand.yellow"
+            color="brand.blue"
+            _hover={{ bg: 'brand.yellowTwo' }}
+          />
+        </HStack>
+        
+        <Text fontSize="sm" color="gray.600">
+          Total: {totalCount} usuarios
+        </Text>
+
+        <Text fontSize="sm" color="gray.600">
+          Página {currentPage} de {totalPages}
+        </Text>
+      </Flex>
+
       {/* Modales */}
       <UserFormModal
         isOpen={isFormOpen}
@@ -242,7 +336,7 @@ export const UsersTable = () => {
         onClose={onDeleteClose}
         onConfirm={handleConfirmDelete}
         title="Eliminar Usuario"
-        description={`¿Está seguro de que desea eliminar a ${selectedUser?.first_name}?`}
+        description={`¿Está seguro de que desea eliminar a ${selectedUser?.first_name} ${selectedUser?.last_name}?`}
       />
     </VStack>
   );
