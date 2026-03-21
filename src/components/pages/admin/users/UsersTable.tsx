@@ -17,7 +17,8 @@ import {
   Heading,
   VStack,
   Input,
-  Spinner
+  Spinner,
+  Select
 } from '@chakra-ui/react';
 import { useEffect, useState, useCallback } from 'react';
 import { supabaseClient } from '@/supabaseClient';
@@ -29,6 +30,9 @@ import { DeleteConfirmationModal } from '../common/DeleteConfirmationModal';
 // Constantes
 const USERS_PAGE_SIZE = 5;
 
+type SortBy = 'first_name'|'creation_date';
+type SortOrder = 'asc' | 'desc';
+
 export const UsersTable = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +40,8 @@ export const UsersTable = () => {
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState<SortBy>('creation_date');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const toast = useToast();
 
   const {
@@ -67,17 +73,23 @@ export const UsersTable = () => {
           user_id,
           first_name,
           last_name,
+          creation_date,
+          role_id,
           Roles!inner(id, role_name)
         `,
         { count: 'exact' }
-      ).order('creation_date', { ascending: false })
-      .range(offset, offset + USERS_PAGE_SIZE - 1);
+      );
       
       if (searchTerm.trim()) {
         query = query.or(
           `first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`
         );
       }
+
+      // aplicación de ordenamiento en bd solo para campos de user_profile
+      query = query.order(sortBy, {
+        ascending: sortOrder === 'asc'
+      }).range(offset, offset + USERS_PAGE_SIZE - 1);
 
       const { data, error, count } = await query as unknown as {
         data: UserWithRole[] | null;
@@ -99,6 +111,7 @@ export const UsersTable = () => {
         last_name: user.last_name,
         photo_profile_url: '', // No se necesita en esta tabla
         role_id: user.role_id,
+        creation_date: user.creation_date,
         Roles: user.Roles,
         role_name: user.Roles?.role_name || 'Sin rol'
       }));
@@ -115,12 +128,12 @@ export const UsersTable = () => {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, currentPage, toast]);
+  }, [searchTerm, currentPage, sortBy, sortOrder, toast]);
 
   // Resetear a página 1 cuando cambia búsqueda
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, sortBy, sortOrder]);
 
   // Ejecutar fetch cuando cambie página o búsqueda
   useEffect(() => {
@@ -190,16 +203,74 @@ export const UsersTable = () => {
       </Box>
 
       {/* Controles */}
-      <HStack spacing={4} wrap="wrap">
-        <Input
-          placeholder="Buscar por nombre o apellido..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          w={{ base: '100%', md: '300px' }}
-          bg="white"
-          isDisabled={loading}
-        />
-      </HStack>
+      <VStack spacing={4} align="stretch">
+        <Flex gap={4} wrap="wrap" align="flex-end">
+          <Box flex={1} minW="250px">
+            <Text fontWeight="bold" color="brand.blue" mb={2} fontSize="sm">
+              Buscar
+            </Text>
+            <Input
+              placeholder="Por nombre o apellido..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              bg="white"
+              isDisabled={loading}
+            />
+          </Box>
+
+          <Box minW="180px">
+            <Text fontWeight="bold" color="brand.blue" mb={2} fontSize="sm">
+              Ordenar por
+            </Text>
+            <Select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortBy)}
+              bg="white"
+              isDisabled={loading}
+              borderColor="gray.300"
+            >
+              <option value="first_name">Nombre</option>
+              <option value="creation_date">Fecha de Registro</option>
+            </Select>
+          </Box>
+
+          <Box minW="140px">
+            <Text fontWeight="bold" color="brand.blue" mb={2} fontSize="sm">
+              Orden
+            </Text>
+            <Flex gap={2}>
+              <Button
+                flex={1}
+                size="sm"
+                bg={sortOrder === 'asc' ? 'brand.yellow' : 'gray.200'}
+                color={sortOrder === 'asc' ? 'brand.blue' : 'black'}
+                fontWeight="bold"
+                onClick={() => setSortOrder('asc')}
+                isDisabled={loading}
+                _hover={{
+                  bg: sortOrder === 'asc' ? 'brand.yellowTwo' : 'gray.300'
+                }}
+              >
+                A-Z ↑
+              </Button>
+              <Button
+                flex={1}
+                size="sm"
+                bg={sortOrder === 'desc' ? 'brand.yellow' : 'gray.200'}
+                color={sortOrder === 'desc' ? 'brand.blue' : 'black'}
+                fontWeight="bold"
+                onClick={() => setSortOrder('desc')}
+                isDisabled={loading}
+                _hover={{
+                  bg: sortOrder === 'desc' ? 'brand.yellowTwo' : 'gray.300'
+                }}
+              >
+                Z-A ↓
+              </Button>
+            </Flex>
+          </Box>
+        </Flex>
+      </VStack>
 
       {/* Tabla */}
       <Box overflowX="auto" bg="white" borderRadius="lg" boxShadow="md">
@@ -208,26 +279,27 @@ export const UsersTable = () => {
             <Tr>
               <Th color="white" textAlign="center">Nombre</Th>
               <Th color="white" textAlign="center">Rol</Th>
+              <Th color="white" textAlign="center">Fecha de Registro</Th>
               <Th color="white" textAlign="center">Acciones</Th>
             </Tr>
           </Thead>
           <Tbody>
             {loading ? (
               <Tr>
-                <Td colSpan={3} textAlign="center" py={8}>
+                <Td colSpan={4} textAlign="center" py={8}>
                   <Spinner color="brand.yellow" />
                 </Td>
               </Tr>
             ) : users.length === 0 ? (
               <Tr>
-                <Td colSpan={3} textAlign="center" py={8}>
+                <Td colSpan={4} textAlign="center" py={8}>
                   <Text color="gray.500">No hay usuarios</Text>
                 </Td>
               </Tr>
             ) : (
               users.map((user) => (
                 <Tr key={user.user_id} _hover={{ bg: 'gray.50' }}>
-                  <Td fontWeight="bold" color="brand.blue" textAlign="center">
+                  <Td fontWeight="bold" color="brand.blue" textAlign="center" py={2}>
                     {user.first_name} {user.last_name}
                   </Td>
                   <Td textAlign="center" py={1}>
@@ -246,7 +318,10 @@ export const UsersTable = () => {
                       </Box>
                     </Flex>
                   </Td>
-                  <Td>
+                  <Td textAlign="center" py={2} fontSize="sm" color="gray.600">
+                    {user.creation_date ? new Date(user.creation_date).toLocaleDateString('es-ES') : 'N/A'}
+                  </Td>
+                  <Td textAlign="center" py={3}>
                     <HStack spacing={2} justify="center">
                       <IconButton
                         aria-label="Editar"
@@ -331,7 +406,7 @@ export const UsersTable = () => {
             <Text fontSize="sm" color="gray.600" mb={1}>
               Total de Usuarios
             </Text>
-            <Text fontSize="2xl" fontWeight="bold" color="brand.blue" align="center">
+            <Text fontSize="2xl" fontWeight="bold" color="brand.blue" textAlign="center">
               {totalCount}
             </Text>
           </Box>

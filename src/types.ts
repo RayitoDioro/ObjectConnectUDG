@@ -28,6 +28,7 @@ export type UserProfile = {
   last_name: string;
   photo_profile_url: string | null;
   role_id: number | null;
+  creation_date: string | null;
 };
 
 export type Role = {
