@@ -27,6 +27,7 @@ export type UserProfile = {
   first_name: string;
   last_name: string;
   photo_profile_url: string | null;
+  role_id: number | null;
 };
 
 export type CardProps = {

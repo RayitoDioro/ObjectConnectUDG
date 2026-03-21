@@ -2,21 +2,31 @@ import { useState, useEffect, createContext, useContext, type ReactNode } from '
 import { supabaseClient } from '../supabaseClient';
 import { type Session } from '@supabase/supabase-js';
 import { type UserProfile } from '../types';
+import { ADMIN_ROLE_IDS } from '@/Config/roles';
 
 // Aquí defino el tipo de datos que tendrá el contexto (sesión y perfil de usuario)
 type AuthContextType = {
   session: Session | null;
   profile: UserProfile | null;
   loading: boolean;
+  roleId: number | null;
+  isAdmin: boolean;
 };
 
 // Creación del contexto que se va a compartir
-const AuthContext = createContext<AuthContextType>({ session: null, profile: null, loading: true });
+const AuthContext = createContext<AuthContextType>({ 
+  session: null,
+  profile: null,
+  loading: true,
+  roleId: null,
+  isAdmin: false });
 
 // Componente proveedor del contexto que contiene la lógica de la autenticación
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [roleId, setRoleId] = useState<number | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true); // Maneja y mejora el estado de carga al usuario
 
   // Obtenemos la sesión inicial al cargar el componente
@@ -33,6 +43,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             .single();
 
             setProfile(data as UserProfile | null);
+            const role_id = (data as UserProfile | null)?.role_id ?? null;
+            setRoleId(role_id);
+            setIsAdmin(role_id != null && ADMIN_ROLE_IDS.includes(role_id))
       }
       setLoading(false);
     };
@@ -61,19 +74,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .single();
 
           setProfile(data as UserProfile | null);
+          const role_id = (data as UserProfile | null)?.role_id ?? null;
+          setRoleId(role_id);
+          setIsAdmin(role_id != null && ADMIN_ROLE_IDS.includes(role_id))
       } else {
         setProfile(null);
+        setRoleId(null);
+        setIsAdmin(false);
       }
     };
 
     fetchProfileOnSessionChange();
   }, [session]);
 
+  useEffect(() => {
+    console.log('roleId actualizado:', roleId);
+    console.log('isAdmin actualizado:', isAdmin);
+  }, [roleId, isAdmin]);
+
   // Datos y funciones que se van a compartir con el contexto
   const value = {
     session,
     profile,
-    loading
+    loading,
+    roleId,
+    isAdmin
   };
 
   // El Provider hace que el "value" (la sesión, perfil y loading) estén disponibles para todos sus hijos, 

@@ -1,37 +1,11 @@
-import { useState } from "react";
-import type { PostProps, ThreadProps } from "../data/types";
-import { supabaseClient } from "@/supabaseClient"; // Importa supabaseClient
+import { supabaseClient } from "@/supabaseClient";
 
-// Estos son datos de ejemplo, que ya no usaremos para crear hilos reales,
-// pero mantenemos la estructura por si se usan en otras partes aún.
-export const sampleThreads: ThreadProps[] = [
-    {
-        finderId:"adsdasdasd564asd",
-        id:"51ebf4bc-1e44-4beb-8446-63bd32c36f69",
-        objectOwnerId:"1e6b4623-4896-42bf-92dd-9ca5b789f474",
-        postId:1
-    }
-];
-
-export const sampleMessages = [
-    {
-        id: "sfsdfsdfsdfsdfsdfsdfsdfs",
-        threadId: "51ebf4bc-1e44-4beb-8446-63bd32c36f69",
-        senderId: "1e6b4623-4896-42bf-92dd-9ca5b789f474",
-        content: "Hola, ¿has visto mi objeto perdido?",
-    },
-    {
-        id: "sfsdfsdfsdfsdfsdfsdfsdfr",
-        threadId: "51ebf4bc-1e44-4beb-8446-63bd32c36f69",
-        senderId: "adsdasdasd564asd",
-        content: "No, crack. Salu2",
-    }
-];
+type ExistingThreadInfo = {
+    thread_id: number;
+    other_participant_id: string;
+};
 
 export const useSchemas = () => {
-    // Mantendremos estos estados por ahora, pero la lógica de chat real ya no dependerá de ellos.
-    const [posts, setPosts] = useState<PostProps[]>([]); // Asumiendo que 'posts' se cargan de otro lado
-    const [threads, setThreads] = useState<ThreadProps[]>(sampleThreads); // Se mantendrá para compatibilidad si hay más referencias
 
     /**
      * Crea un nuevo hilo de chat e inserta el primer mensaje.
@@ -39,6 +13,24 @@ export const useSchemas = () => {
      */
     async function createThreaForPost(finderId: string, postId: number, objectOwnerId: string): Promise<number | null> {
         try {
+            // 1. Verificar si ya existe un hilo con este usuario
+            const { data: existingThreads, error: fetchError } = await supabaseClient.rpc('get_user_threads');
+            
+            if (fetchError) {
+                console.error("Error fetching existing threads:", fetchError);
+                // Si falla la verificación, continuamos para no bloquear
+            } else if (existingThreads) {
+                const existingThread = (existingThreads as ExistingThreadInfo[]).find(
+                    t => t.other_participant_id === finderId
+                );
+                
+                if (existingThread) {
+                    console.log("Thread already exists, redirecting to thread:", existingThread.thread_id);
+                    return existingThread.thread_id;
+                }
+            }
+
+            // 2. Si no existe, crear uno nuevo
             // El mensaje inicial definido por el usuario
             const initialMessageContent = "Hola! Creo que encontraste un objeto mio que se me perdio";
 
@@ -52,9 +44,6 @@ export const useSchemas = () => {
                 console.error("Error creating thread with initial message:", error);
                 throw error;
             }
-
-            // Opcional: Si quieres mantener el estado local sincronizado, aunque el real ya está en DB
-            // setThreads(prev => [...prev, { id: threadId, postId, objectOwnerId, finderId }]);
             
             return threadId;
 
@@ -65,9 +54,6 @@ export const useSchemas = () => {
     }
 
     return {
-        posts, // Mantenido para compatibilidad
-        threads, // Mantenido para compatibilidad
-        createThreaForPost,
-        sampleMessages // Mantenido para compatibilidad
+        createThreaForPost
     };
 };
