@@ -33,10 +33,11 @@ export type UserProfile = {
 export type Role = {
   id: number;
   role_name: string;
+  descripcion: string;
 }
 
 export type UserWithRole = 
-  UserProfile & { Roles?: { id: number; role_name: string } };
+  UserProfile & { Roles?: Role } ;
 
 export type CardProps = {
   id: number;

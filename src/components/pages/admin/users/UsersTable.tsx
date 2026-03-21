@@ -27,7 +27,7 @@ import { UserFormModal } from './UserFormModal';
 import { DeleteConfirmationModal } from '../common/DeleteConfirmationModal';
 
 // Constantes
-const USERS_PAGE_SIZE = 2;
+const USERS_PAGE_SIZE = 5;
 
 export const UsersTable = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
@@ -67,8 +67,6 @@ export const UsersTable = () => {
           user_id,
           first_name,
           last_name,
-          photo_profile_url,
-          role_id,
           Roles!inner(id, role_name)
         `,
         { count: 'exact' }
@@ -99,7 +97,7 @@ export const UsersTable = () => {
         user_id: user.user_id,
         first_name: user.first_name,
         last_name: user.last_name,
-        photo_profile_url: user.photo_profile_url,
+        photo_profile_url: '', // No se necesita en esta tabla
         role_id: user.role_id,
         Roles: user.Roles,
         role_name: user.Roles?.role_name || 'Sin rol'
@@ -232,7 +230,7 @@ export const UsersTable = () => {
                   <Td fontWeight="bold" color="brand.blue" textAlign="center">
                     {user.first_name} {user.last_name}
                   </Td>
-                  <Td textAlign="center">
+                  <Td textAlign="center" py={1}>
                     <Flex justify="center">
                       <Box
                         px={4}
@@ -276,8 +274,8 @@ export const UsersTable = () => {
       </Box>
 
       {/* Paginación */}
-      <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
-        <HStack spacing={2}>
+      <VStack spacing={6} align="stretch">
+        <Flex justify="center" align="center" wrap="wrap" gap={4}>
           <IconButton
             aria-label="Página anterior"
             icon={<Icon as={FiChevronLeft} />}
@@ -287,7 +285,7 @@ export const UsersTable = () => {
             color="brand.blue"
             _hover={{ bg: 'brand.yellowTwo' }}
           />
-          
+
           {/* Botones de páginas */}
           <HStack spacing={1}>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
@@ -299,12 +297,15 @@ export const UsersTable = () => {
                 fontWeight={currentPage === page ? 'bold' : 'normal'}
                 size="sm"
                 isDisabled={loading}
+                _hover={{
+                  bg: currentPage === page ? 'brand.blue' : 'gray.300'
+                }}
               >
                 {page}
               </Button>
             ))}
           </HStack>
-
+        
           <IconButton
             aria-label="Página siguiente"
             icon={<Icon as={FiChevronRight} />}
@@ -314,16 +315,28 @@ export const UsersTable = () => {
             color="brand.blue"
             _hover={{ bg: 'brand.yellowTwo' }}
           />
-        </HStack>
-        
-        <Text fontSize="sm" color="gray.600">
-          Total: {totalCount} usuarios
-        </Text>
+        </Flex>
 
-        <Text fontSize="sm" color="gray.600">
-          Página {currentPage} de {totalPages}
-        </Text>
-      </Flex>
+        {/* Stat de total de usuarios */}
+        <Flex justify="center" gap={6} wrap="wrap">
+          <Box
+            bg="white"
+            px={6}
+            py={3}
+            borderRadius="lg"
+            boxShadow="md"
+            border="2px"
+            borderColor="brand.yellow"
+          >
+            <Text fontSize="sm" color="gray.600" mb={1}>
+              Total de Usuarios
+            </Text>
+            <Text fontSize="2xl" fontWeight="bold" color="brand.blue" align="center">
+              {totalCount}
+            </Text>
+          </Box>
+        </Flex>
+      </VStack>
 
       {/* Modales */}
       <UserFormModal

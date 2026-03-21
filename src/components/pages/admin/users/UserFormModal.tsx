@@ -9,9 +9,10 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Select,
   useToast,
   VStack,
+  Text,
+  Box
 } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
 import { supabaseClient } from '@/supabaseClient';
@@ -60,7 +61,7 @@ export const UserFormModal = ({ isOpen, onClose, user }: UserFormModalProps) => 
     if (!formData.role_id) {
       toast({
         title: 'Error',
-        description: 'Por favor completa todos los campos',
+        description: 'Por favor selecciona el nuevo rol',
         status: 'error',
       });
       return;
@@ -85,13 +86,6 @@ export const UserFormModal = ({ isOpen, onClose, user }: UserFormModalProps) => 
           description: 'Usuario actualizado correctamente',
           status: 'success',
         });
-      } else {
-        // Crear (nota: en producción, esto sería más complejo)
-        toast({
-          title: 'Info',
-          description: 'La creación de usuarios debe hacerse a través del sistema de autenticación',
-          status: 'info',
-        });
       }
 
       onClose();
@@ -110,33 +104,94 @@ export const UserFormModal = ({ isOpen, onClose, user }: UserFormModalProps) => 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent>
-        <ModalHeader color="brand.blue" fontWeight="bold">
-          {user ? 'Editar Usuario' : 'Nuevo Usuario'}
+      <ModalContent borderTop="4px" borderTopColor="brand.yellow">
+        <ModalHeader 
+          color="brand.blue"
+          fontWeight="bold"
+          fontSize="lg"
+        >
+          Cambiar rol de {user?.first_name} {user?.last_name}
         </ModalHeader>
         <ModalCloseButton />
+
         <ModalBody>
-          <VStack spacing={4}>
-            <FormControl>
-              <FormLabel>Rol</FormLabel>
-              <Select
+          <VStack spacing={6} align="stretch">
+            {/* Info del usuario */}
+            <Box 
+              bg="gray.50" 
+              p={4} 
+              borderRadius="md"
+              borderLeft="4px"
+              borderLeftColor="brand.yellow"
+            >
+              <Text fontSize="sm" color="gray.600">Usuario Actual</Text>
+              <Text fontWeight="bold" color="brand.blue" fontSize="md">
+                {user?.first_name} {user?.last_name}
+              </Text>
+              <Text fontSize="sm" color="gray.500" mt={1}>
+                Rol actual: <strong>{user?.role_name || 'Sin rol'}</strong>
+              </Text>
+            </Box>
+
+            {/* Select de roles */}
+            <FormControl isRequired>
+              <FormLabel fontWeight="bold" color="brand.blue">
+                Nuevo Rol
+              </FormLabel>
+              <Box
+                as="select"
+                w="100%"
+                px={4}
+                py={3}
+                borderRadius="md"
+                borderWidth="2px"
+                borderColor="gray.300"
+                bg="white"
+                color="black"
+                fontWeight="500"
+                _hover={{ borderColor: 'brand.yellow' }}
+                _focus={{
+                  borderColor: 'brand.yellow',
+                  boxShadow: '0 0 0 1px rgba(253, 176, 47, 0.5)',
+                  outline: 'none',
+                }}
                 value={formData.role_id}
-                onChange={(e) =>
+                onChange={(e : React.ChangeEvent<HTMLSelectElement>) =>
                   setFormData({ ...formData, role_id: e.target.value })
                 }
               >
-                <option value="">Seleccionar rol</option>
+                <option value="">-- Seleccionar rol --</option>
                 {roles.map((role) => (
                   <option key={role.id} value={role.id}>
                     {role.role_name}
                   </option>
                 ))}
-              </Select>
+              </Box>
             </FormControl>
+
+            {/* Descripción del rol seleccionado */}
+            {formData.role_id && (
+              <Box
+                bg="brand.lightGray"
+                p={3}
+                borderRadius="md"
+                borderLeft="4px"
+                borderLeftColor="brand.blue"
+              >
+                <Text fontSize="sm" fontWeight="600" color="brand.blue">
+                  {roles.find(r => r.id === parseInt(formData.role_id))?.descripcion || 'Sin descripción disponible'  }
+                </Text>
+              </Box>
+            )}
           </VStack>
         </ModalBody>
-        <ModalFooter>
-          <Button variant="ghost" mr={3} onClick={onClose}>
+
+        <ModalFooter gap={3}>
+          <Button 
+            variant="ghost" 
+            onClick={onClose}
+            _hover={{ bg: 'gray.100' }}
+          >
             Cancelar
           </Button>
           <Button
@@ -145,8 +200,10 @@ export const UserFormModal = ({ isOpen, onClose, user }: UserFormModalProps) => 
             fontWeight="bold"
             isLoading={loading}
             onClick={handleSubmit}
+            isDisabled={!formData.role_id}
+            _hover={{ bg: 'brand.yellowTwo' }}
           >
-            {user ? 'Guardar cambios' : 'Crear usuario'}
+            Cambiar Rol
           </Button>
         </ModalFooter>
       </ModalContent>
