@@ -20,7 +20,7 @@ import {
   Spinner,
   Select
 } from '@chakra-ui/react';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabaseClient } from '@/supabaseClient';
 import { type UserWithRole } from '@/types';
 import { FiEdit, FiTrash2, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
@@ -42,6 +42,9 @@ export const UsersTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<SortBy>('creation_date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
   const {
@@ -80,9 +83,9 @@ export const UsersTable = () => {
         { count: 'exact' }
       );
       
-      if (searchTerm.trim()) {
+      if (debouncedSearchTerm.trim()) {
         query = query.or(
-          `first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`
+          `first_name.ilike.%${debouncedSearchTerm}%,last_name.ilike.%${debouncedSearchTerm}%`
         );
       }
 
@@ -128,17 +131,46 @@ export const UsersTable = () => {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, currentPage, sortBy, sortOrder, toast]);
+  }, [debouncedSearchTerm, currentPage, sortBy, sortOrder, toast]);
 
   // Resetear a página 1 cuando cambia búsqueda
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, sortBy, sortOrder]);
+  }, [debouncedSearchTerm, sortBy, sortOrder]);
 
   // Ejecutar fetch cuando cambie página o búsqueda
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  // Hacer focus en el input después de buscar
+  useEffect(() => {
+    if (!loading) {
+      inputRef.current?.focus();
+    }
+  }, [loading]);
+
+  // Debounce del search term
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    if (searchTerm.length === 0) {
+      setDebouncedSearchTerm('');
+      return;
+    }
+
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 700);
+
+    return () => {
+      if(debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [searchTerm]);
 
   const handleEdit = (user: UserWithRole) => {
     setSelectedUser(user);
@@ -210,6 +242,7 @@ export const UsersTable = () => {
               Buscar
             </Text>
             <Input
+              ref={inputRef}
               placeholder="Por nombre o apellido..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
