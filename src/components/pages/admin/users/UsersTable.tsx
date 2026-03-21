@@ -23,7 +23,9 @@ import {
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabaseClient } from '@/supabaseClient';
 import { type UserWithRole } from '@/types';
-import { FiEdit, FiTrash2, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiChevronLeft, FiChevronRight,
+  FiArrowUp,
+  FiArrowDown } from 'react-icons/fi';
 import { UserFormModal } from './UserFormModal';
 import { DeleteConfirmationModal } from '../common/DeleteConfirmationModal';
 
@@ -310,9 +312,69 @@ export const UsersTable = () => {
         <Table>
           <Thead bg="brand.blue">
             <Tr>
-              <Th color="white" textAlign="center">Nombre</Th>
+              <Th color="white" textAlign="center">
+                <Flex justify="center" align="center" gap={2} cursor="pointer">
+                  <Text>Nombre</Text>
+                  <IconButton
+                    aria-label="Ordenar por nombre"
+                    icon={
+                      <Icon
+                        as={
+                          sortBy === 'first_name' && sortOrder === 'asc'
+                            ? FiArrowUp
+                            : sortBy === 'first_name' && sortOrder === 'desc'
+                            ? FiArrowDown
+                            : FiArrowUp
+                        }
+                      />
+                    }
+                    size="sm"
+                    bg="transparent"
+                    color="white"
+                    _hover={{ bg: 'rgba(255,255,255,0.2)' }}
+                    onClick={() => {
+                      if (sortBy === 'first_name') {
+                        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                      } else {
+                        setSortBy('first_name');
+                        setSortOrder('asc');
+                      }
+                    }}
+                  />
+                </Flex>
+              </Th>
               <Th color="white" textAlign="center">Rol</Th>
-              <Th color="white" textAlign="center">Fecha de Registro</Th>
+              <Th color="white" textAlign="center">
+                <Flex justify="center" align="center" gap={2} cursor="pointer">
+                  <Text>Fecha de Registro</Text>
+                  <IconButton
+                    aria-label="Ordenar por fecha"
+                    icon={
+                      <Icon
+                        as={
+                          sortBy === 'creation_date' && sortOrder === 'asc'
+                            ? FiArrowUp
+                            : sortBy === 'creation_date' && sortOrder === 'desc'
+                            ? FiArrowDown
+                            : FiArrowUp
+                        }
+                      />
+                    }
+                    size="sm"
+                    bg="transparent"
+                    color="white"
+                    _hover={{ bg: 'rgba(255,255,255,0.2)' }}
+                    onClick={() => {
+                      if (sortBy === 'creation_date') {
+                        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                      } else {
+                        setSortBy('creation_date');
+                        setSortOrder('asc');
+                      }
+                    }}
+                  />
+                </Flex>
+              </Th>
               <Th color="white" textAlign="center">Acciones</Th>
             </Tr>
           </Thead>
