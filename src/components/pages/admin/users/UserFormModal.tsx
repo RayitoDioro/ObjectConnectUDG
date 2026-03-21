@@ -11,8 +11,10 @@ import {
   FormLabel,
   useToast,
   VStack,
+  HStack,
+  Avatar,
   Text,
-  Box
+  Box,
 } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
 import { supabaseClient } from '@/supabaseClient';
@@ -117,21 +119,31 @@ export const UserFormModal = ({ isOpen, onClose, user }: UserFormModalProps) => 
         <ModalBody>
           <VStack spacing={6} align="stretch">
             {/* Info del usuario */}
-            <Box 
-              bg="gray.50" 
-              p={4} 
-              borderRadius="md"
-              borderLeft="4px"
-              borderLeftColor="brand.yellow"
-            >
-              <Text fontSize="sm" color="gray.600">Usuario Actual</Text>
-              <Text fontWeight="bold" color="brand.blue" fontSize="md">
-                {user?.first_name} {user?.last_name}
-              </Text>
-              <Text fontSize="sm" color="gray.500" mt={1}>
-                Rol actual: <strong>{user?.role_name || 'Sin rol'}</strong>
-              </Text>
-            </Box>
+            <HStack
+                bg="gray.50" 
+                p={4} 
+                borderRadius="md"
+                borderLeft="4px"
+                borderLeftColor="brand.yellow"
+                spacing={4}
+              >
+                <Avatar
+                name={`${user?.first_name} ${user?.last_name}`}
+                src={user?.photo_profile_url || undefined}
+                size="lg"
+                border="3px"
+                borderColor="brand.yellow"
+              />
+              <VStack align="start" spacing={1}>
+                <Text fontSize="sm" color="gray.600">Usuario Actual</Text>
+                <Text fontWeight="bold" color="brand.blue" fontSize="md">
+                  {user?.first_name} {user?.last_name}
+                </Text>
+                <Text fontSize="sm" color="gray.500">
+                  Rol actual: <strong>{user?.role_name || 'Sin rol'}</strong>
+                </Text>
+              </VStack>
+            </HStack>
 
             {/* Select de roles */}
             <FormControl isRequired>
