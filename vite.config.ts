@@ -5,4 +5,13 @@ import tsConfigPaths from "vite-tsconfig-paths"
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tsConfigPaths()],
+  server: {
+    proxy: {
+      '/api-proxy': {
+        target: 'https://fastapimicroserviceforsearch.fly.dev/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-proxy/, ''),
+      },
+    },
+  },
 })
