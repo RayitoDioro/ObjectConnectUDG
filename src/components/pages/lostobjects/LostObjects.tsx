@@ -20,7 +20,6 @@ import {
   FormLabel,
   Input,
   Textarea,
-  Flex,
   Alert,
   AlertIcon,
   AlertTitle,
@@ -118,7 +117,6 @@ export default function LostObjects() {
 
   const handleCardClick = (object: FullCardProps) => {
     setSelectedObject(object);
-    setSelectedPostUser(null);
     onModalOpen();
   };
 
@@ -138,6 +136,7 @@ export default function LostObjects() {
     setIsTargetSet(false);
     sessionStorage.removeItem('searchTitle');
     sessionStorage.removeItem('searchDescription');
+     onMatchesClose();
   };
 
   const handleCreateChatWithUser = async (authorId: string, postId: number, currentUserId: string) => {
@@ -173,15 +172,9 @@ export default function LostObjects() {
           </Box>
 
           {/* CONTROLES Y BÚSQUEDA */}
-          <Center w="100%">
-            <Flex
-              direction={{ base: 'column', md: 'row' }}
-              alignItems="flex-start"
-              justifyContent="center"
-              gap={4}
-              w="100%"
-            >
-              <HStack spacing={4} mt={{ base: 0, md: "24px" }}>
+          <VStack spacing={4} align="stretch" w="100%">
+            {/* Botones de objetivo */}
+            <HStack spacing={4} justify="center" flexWrap="wrap">
                 <Button
                   leftIcon={<StarIcon />}
                   bg="#00569c"
@@ -203,7 +196,7 @@ export default function LostObjects() {
               </HStack>
 
               {/* Componente de Búsqueda */}
-              <Box>
+              <Box w="100%">
                 <FilterSortControls
                   searchObj={searchObj}
                   setSearchObj={setSearchObj}
@@ -214,8 +207,7 @@ export default function LostObjects() {
                   categoriesList={dbCategories as any}
                 />
               </Box>
-            </Flex>
-          </Center>
+              </VStack>
 
           {/* TARJETAS */}
           <Box w="100%" mt={4}>
@@ -345,7 +337,11 @@ export default function LostObjects() {
       {/* MODAL UNIVERSAL DE DETALLES */}
       <ObjectDetailsModal
         isOpen={isModalOpen}
-        onClose={onModalClose}
+        onClose={() => {
+          onModalClose();
+          setSelectedObject(null);
+          setSelectedPostUser(null);
+        }}
         selectedObj={modalObj}
         currentUserId={profile?.user_id || null}
         onStartChat={(authorId) => {
