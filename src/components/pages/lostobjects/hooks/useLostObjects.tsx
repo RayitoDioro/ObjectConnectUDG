@@ -4,7 +4,7 @@ import { useSchemas } from "../../../../hooks/useSchemas";
 import { supabaseClient } from "@/supabaseClient";
 import { useAuth } from "../../../../context/AuthContext";
 
-const SEARCH_API_URL = "/api-proxy/buscar";
+const SEARCH_API_URL = import.meta.env.VITE_SEARCH_API_URL;
 const SIMILARITY_THRESHOLD = 0.6;
 const SEARCH_TIMEOUT_MS = 90000; // 90 seconds timeout for Render cold start
 
