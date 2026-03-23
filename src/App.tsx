@@ -1,21 +1,22 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 // Layouts y paginas
-import { MainLayout } from './layouts/MainLayout.tsx';
-import Home from './components/pages/home/Home.tsx'
-import Login from './components/pages/login/Login.tsx';
-import LostObjects from './components/pages/lostobjects/LostObjects.tsx';
-import FoundObjects from './components/pages/foundobjects/foundobjects.tsx';
-import PublishObject from './components/pages/publishobject/PublishObject.tsx'; // 1. Importamos el nuevo componente
-import Profile from './components/pages/profile/Profile.tsx';
-import { AuthProvider } from './context/AuthContext.tsx';
-import { ProtectedRoute } from './components/common/ProtectedRoute.tsx';
-import Chats from './components/pages/chats/Chats.tsx';
-import ProfileSettings from './ProfileSettings';
-import { ProtectedRouteAdmin } from './components/common/ProtectedRouteAdmin.tsx';
-import { AdminDashboard } from './components/pages/admin/AdminDashboard.tsx';
-import { AdminLayout } from './layouts/AdminLayout.tsx';
-import { UsersTable } from './components/pages/admin/users/UsersTable.tsx';
+import { MainLayout } from "./layouts/MainLayout.tsx";
+import Home from "./components/pages/home/Home.tsx";
+import Login from "./components/pages/login/Login.tsx";
+import LostObjects from "./components/pages/lostobjects/LostObjects.tsx";
+import FoundObjects from "./components/pages/foundobjects/foundobjects.tsx";
+import PublishObject from "./components/pages/publishobject/PublishObject.tsx"; // 1. Importamos el nuevo componente
+import Profile from "./components/pages/profile/Profile.tsx";
+import { AuthProvider } from "./context/AuthContext.tsx";
+import { ProtectedRoute } from "./components/common/ProtectedRoute.tsx";
+import Chats from "./components/pages/chats/Chats.tsx";
+import ProfileSettings from "./ProfileSettings";
+import { ProtectedRouteAdmin } from "./components/common/ProtectedRouteAdmin.tsx";
+import { AdminDashboard } from "./components/pages/admin/AdminDashboard.tsx";
+import { AdminLayout } from "./layouts/AdminLayout.tsx";
+import { UsersTable } from "./components/pages/admin/users/UsersTable.tsx";
+import MetricasML from "./pages/admin/MetricasML.tsx";
 
 function App() {
   // Elimina el useAuth aquí, solo usa el Provider
@@ -23,21 +24,41 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<MainLayout> <Home /> </MainLayout>} />
+          <Route
+            path="/"
+            element={
+              <MainLayout>
+                {" "}
+                <Home />{" "}
+              </MainLayout>
+            }
+          />
           <Route
             path="/objetos-perdidos"
             element={
               <ProtectedRoute>
-                <MainLayout><LostObjects /></MainLayout>
+                <MainLayout>
+                  <LostObjects />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
-          <Route path="/objetos-encontrados" element={<MainLayout> <FoundObjects/> </MainLayout>} />
+          <Route
+            path="/objetos-encontrados"
+            element={
+              <MainLayout>
+                {" "}
+                <FoundObjects />{" "}
+              </MainLayout>
+            }
+          />
           <Route
             path="/publicar-objeto"
             element={
               <ProtectedRoute>
-                <MainLayout><PublishObject /></MainLayout>
+                <MainLayout>
+                  <PublishObject />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
@@ -45,7 +66,9 @@ function App() {
             path="/chats/:threadId?"
             element={
               <ProtectedRoute>
-                <MainLayout><Chats /></MainLayout>
+                <MainLayout>
+                  <Chats />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
@@ -53,7 +76,9 @@ function App() {
             path="/perfil"
             element={
               <ProtectedRoute>
-                <MainLayout><Profile /></MainLayout>
+                <MainLayout>
+                  <Profile />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
@@ -61,7 +86,9 @@ function App() {
             path="/perfil/:userId"
             element={
               <ProtectedRoute>
-                <MainLayout><Profile /></MainLayout>
+                <MainLayout>
+                  <Profile />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
@@ -69,16 +96,18 @@ function App() {
             path="/settings"
             element={
               <ProtectedRoute>
-                <MainLayout><ProfileSettings /></MainLayout>
+                <MainLayout>
+                  <ProfileSettings />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
           <Route
-            path='/admin'
+            path="/admin"
             element={
               <ProtectedRouteAdmin>
                 <AdminLayout>
-                  <AdminDashboard/>
+                  <AdminDashboard />
                 </AdminLayout>
               </ProtectedRouteAdmin>
             }
@@ -109,6 +138,16 @@ function App() {
               <ProtectedRouteAdmin>
                 <AdminLayout>
                   <div>Gestionar Posts</div>
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/metricas"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <MetricasML />
                 </AdminLayout>
               </ProtectedRouteAdmin>
             }

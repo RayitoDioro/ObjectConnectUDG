@@ -1,7 +1,22 @@
-import { Box, Flex, VStack, HStack, Heading, Button, Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerBody, useDisclosure, IconButton } from '@chakra-ui/react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { HamburgerIcon, ArrowBackIcon } from '@chakra-ui/icons';
-import { type ReactNode } from 'react';
+import {
+  Box,
+  Flex,
+  VStack,
+  HStack,
+  Heading,
+  Button,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  DrawerHeader,
+  DrawerBody,
+  useDisclosure,
+  IconButton,
+} from "@chakra-ui/react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { HamburgerIcon, ArrowBackIcon } from "@chakra-ui/icons";
+import { type ReactNode } from "react";
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -13,10 +28,11 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const navItems = [
-    { label: 'Dashboard', path: '/admin' },
-    { label: 'Usuarios', path: '/admin/usuarios' },
-    { label: 'Roles', path: '/admin/roles' },
-    { label: 'Posts', path: '/admin/posts' },
+    { label: "Dashboard", path: "/admin" },
+    { label: "Usuarios", path: "/admin/usuarios" },
+    { label: "Roles", path: "/admin/roles" },
+    { label: "Posts", path: "/admin/posts" },
+    { label: "Métricas ML", path: "/admin/metricas" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -25,10 +41,10 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     <Button
       w="full"
       justifyContent="start"
-      bg={isActive(path) ? 'brand.yellow' : 'transparent'}
-      color={isActive(path) ? 'brand.blue' : 'white'}
-      fontWeight={isActive(path) ? 'bold' : 'normal'}
-      _hover={{ bg: 'brand.yellow', color: 'brand.blue' }}
+      bg={isActive(path) ? "brand.yellow" : "transparent"}
+      color={isActive(path) ? "brand.blue" : "white"}
+      fontWeight={isActive(path) ? "bold" : "normal"}
+      _hover={{ bg: "brand.yellow", color: "brand.blue" }}
       onClick={() => {
         navigate(path);
         onClose();
@@ -48,7 +64,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         bg="brand.blue"
         color="white"
         p={6}
-        display={{ base: 'none', md: 'block' }}
+        display={{ base: "none", md: "block" }}
         boxShadow="lg"
       >
         <Heading size="md" mb={8} color="brand.yellow">
@@ -68,7 +84,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
           bg="brand.blue"
           color="white"
           p={4}
-          display={{ base: 'flex', md: 'none' }}
+          display={{ base: "flex", md: "none" }}
           justifyContent="space-between"
           alignItems="center"
           boxShadow="md"
@@ -81,7 +97,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             icon={<HamburgerIcon />}
             variant="outline"
             borderColor="brand.yellow"
-            _hover={{ bg: 'brand.yellow', color: 'brand.blue' }}
+            _hover={{ bg: "brand.yellow", color: "brand.blue" }}
             onClick={onOpen}
           />
         </Box>
@@ -97,7 +113,11 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             <DrawerBody>
               <VStack spacing={2} align="stretch">
                 {navItems.map((item) => (
-                  <NavButton key={item.path} label={item.label} path={item.path} />
+                  <NavButton
+                    key={item.path}
+                    label={item.label}
+                    path={item.path}
+                  />
                 ))}
               </VStack>
             </DrawerBody>
