@@ -258,12 +258,20 @@ export const RolePermissionsTable = () => {
     try {
       setSaving(true);
 
+      // Backup en memoria de permisos en caso de fallar
+      const previousPermissions = Array.from(currentRolePermissions).map(permiso_id => ({
+        rol_id: selectedRole.id,
+        permiso_id,
+      }));
+
       // 1. Eliminar todos los permisos actuales del rol
-      await supabaseClient
+      const { error: deleteError } = await supabaseClient
         .from('roles_permisos')
         .delete()
         .eq('rol_id', selectedRole.id);
 
+      if (deleteError) throw deleteError;
+      
       // 2. Insertar nuevos permisos
       if (currentRolePermissions.size > 0) {
         const newPermissions = Array.from(currentRolePermissions).map(permiso_id => ({
@@ -271,12 +279,29 @@ export const RolePermissionsTable = () => {
           permiso_id,
         }));
 
-        const { error } = await supabaseClient
+        const { error: insertError } = await supabaseClient
           .from('roles_permisos')
           .insert(newPermissions);
 
-        if (error) throw error;
+        if (insertError) {
+        // Error al insertar: Restaurar permisos anteriores
+        console.error('Error al insertar nuevos permisos, restaurando anteriores...', insertError);
+
+        if (previousPermissions.length > 0) {
+          const { error: restoreError } = await supabaseClient
+            .from('roles_permisos')
+            .insert(previousPermissions);
+
+          if (restoreError) {
+            throw new Error(
+              `Error crítico: No se pudieron restaurar los permisos anteriores. ${insertError.message}`
+            );
+          }
+        }
+
+        throw insertError;
       }
+    }
 
       toast({
         title: 'Éxito',
@@ -293,11 +318,16 @@ export const RolePermissionsTable = () => {
       fetchRoles();
     } catch (error) {
       console.error('Error saving permissions:', error);
+
+      const errorMessage = error instanceof Error
+      ? error.message 
+      : 'No se pudo guardar los permisos';
+
       toast({
         title: 'Error',
-        description: 'No se pudieron guardar los permisos',
+        description: errorMessage,
         status: 'error',
-        duration: 3000,
+        duration: 4000,
         isClosable: true,
       });
     } finally {
