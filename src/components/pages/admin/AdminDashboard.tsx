@@ -4,14 +4,21 @@ import { type Statistics } from '@/types';
 import { useEffect, useState } from 'react';
 import { supabaseClient } from '@/supabaseClient';
 
+interface ExtendedStatistics extends Statistics {
+  totalPermissions: number;
+  totalCategories: number;
+}
+
 export const AdminDashboard = () => {
   const navigate = useNavigate();
   const toast = useToast();
-  const [stats, setStats] = useState<Statistics>({
+  const [stats, setStats] = useState<ExtendedStatistics>({
     totalUsers: 0,
     totalRoles: 0,
     totalPosts: 0,
     activeUsers: 0,
+    totalPermissions: 0,
+    totalCategories: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -35,6 +42,16 @@ export const AdminDashboard = () => {
             .from('posts')
             .select('*', {count : 'exact', head: true});
 
+            // permisos totales
+            const { count: permissionsCount } = await supabaseClient
+            .from('permisos')
+            .select('*', { count: 'exact', head: true });
+
+            // categorías totales
+            const { count: categoriesCount } = await supabaseClient
+            .from('categories')
+            .select('*', { count: 'exact', head: true });
+
             // usuarios creados en los últimos 7 días
             const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
             .toISOString();
@@ -48,7 +65,9 @@ export const AdminDashboard = () => {
               totalUsers: usersCount || 0,
               totalRoles: rolesCount || 0,
               totalPosts: postsCount || 0,
-              activeUsers: activeUsersCount || 0
+              activeUsers: activeUsersCount || 0,
+              totalPermissions: permissionsCount || 0,
+              totalCategories: categoriesCount || 0,
             });
 
         } catch(error){
@@ -93,7 +112,7 @@ export const AdminDashboard = () => {
 
       {/* Estadísticas */}
       <Grid 
-        templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)'}}
+        templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(6, 1fr)'}}
         gap={{base: 4, md: 6}}
       >
         <GridItem>
@@ -108,6 +127,12 @@ export const AdminDashboard = () => {
         <GridItem>
           <StatCard label='Usuarios nuevos' number={stats.activeUsers} helpText='en últimos 7 días'/>
         </GridItem>
+        <GridItem>
+          <StatCard label='Total permisos' number={stats.totalPermissions} helpText='disponibles'/>
+        </GridItem>
+        <GridItem>
+          <StatCard label='Total categorías' number={stats.totalCategories} helpText='creadas'/>
+        </GridItem>
       </Grid>
 
       {/* opciones de gestión */}
@@ -119,11 +144,13 @@ export const AdminDashboard = () => {
         </Box>
         
       <Box bg="white" p={6} borderRadius="lg" boxShadow="md">
-        <VStack spacing={4} wrap="wrap">
+        <VStack spacing={4}>
           <HStack 
             spacing={3}
             wrap="wrap"
             gap={4}
+            justify="center"
+            w="full"
           >
             <Button 
               onClick={() => navigate('/admin/usuarios')}
@@ -133,7 +160,7 @@ export const AdminDashboard = () => {
               _hover={{ bg: 'brand.yellowTwo' }}
               w={{ base: '100%', sm: 'auto' }}
             >
-              Roles de Usuarios
+              Gestionar Usuarios
             </Button>
             
             <Button 
@@ -147,7 +174,7 @@ export const AdminDashboard = () => {
               Gestionar Roles
             </Button>
 
-            <Button 
+            {/* <Button 
               onClick={() => navigate('/admin/posts')}
               bg="brand.yellow"
               color="brand.blue"
@@ -156,6 +183,39 @@ export const AdminDashboard = () => {
               w={{ base: '100%', sm: 'auto' }}
             >
               Gestionar Posts
+            </Button> */}
+
+            <Button 
+              onClick={() => navigate('/admin/permisos')}
+              bg="brand.yellow"
+              color="brand.blue"
+              fontWeight="bold"
+              _hover={{ bg: 'brand.yellowTwo' }}
+              w={{ base: '100%', sm: 'auto' }}
+            >
+              Gestionar Permisos
+            </Button>
+
+            <Button 
+              onClick={() => navigate('/admin/rolePermisos')}
+              bg="brand.yellow"
+              color="brand.blue"
+              fontWeight="bold"
+              _hover={{ bg: 'brand.yellowTwo' }}
+              w={{ base: '100%', sm: 'auto' }}
+            >
+              Permisos de Rol
+            </Button>
+
+            <Button 
+              onClick={() => navigate('/admin/categorias')}
+              bg="brand.yellow"
+              color="brand.blue"
+              fontWeight="bold"
+              _hover={{ bg: 'brand.yellowTwo' }}
+              w={{ base: '100%', sm: 'auto' }}
+            >
+              Gestionar Categorías
             </Button>
           </HStack>
         </VStack>
