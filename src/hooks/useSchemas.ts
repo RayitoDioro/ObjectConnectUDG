@@ -113,5 +113,42 @@ export function useSchemas() {
         }
     }
 
-    return { uploadPostWithImage, getPosts, getCategories, getUserById };
+    // --- NUEVA FUNCIÓN AÑADIDA: CREAR HILO DE CHAT VINCULADO A UN POST ---
+    async function createThreadForPost(authorId: string, postId: number, currentUserId: string) {
+        try {
+            // 1. Primero verificamos si ya existe un chat entre estos dos usuarios PARA ESTE POST específico
+            // Así evitamos que si le das clic 3 veces al botón de crear chat, se hagan 3 chats idénticos
+            const { data: existingThreads, error: fetchError } = await supabaseClient
+                .from('threads')
+                .select('id')
+                .eq('post_id', postId)
+                .or(`participant1_id.eq.${currentUserId},participant2_id.eq.${currentUserId}`);
+
+            if (fetchError) throw fetchError;
+
+            // Si ya existe, simplemente devolvemos el ID de ese chat para que el navegador te redirija ahí
+            if (existingThreads && existingThreads.length > 0) {
+                return existingThreads[0].id;
+            }
+
+            // 2. Si no existe, creamos el hilo nuevo guardando el post_id
+            const { data: newThread, error: insertError } = await supabaseClient
+                .from('threads')
+                .insert({
+                    post_id: postId,
+                    participant1_id: currentUserId,
+                    participant2_id: authorId
+                })
+                .select('id')
+                .single();
+
+            if (insertError) throw insertError;
+
+            return newThread.id;
+        } catch (error) {
+            console.error('Error creating thread:', error);
+            return null;
+        }
+    }
+    return { uploadPostWithImage, getPosts, getCategories, getUserById, createThreadForPost };
 }

@@ -1,40 +1,61 @@
-import type { CardProps } from '@/types';
 import { useState, useEffect } from 'react';
 
-export const useObjectFilter = (objects: CardProps[]) => {
-    const [filteredObjects, setFilteredObjects] = useState(objects);
-    const [searchObj, setSearchObj] = useState('');
-    const [sortBy, setSortBy] = useState('newest');
+export const useObjectFilter = (objects: any[]) => { // Usamos any[] temporalmente para aceptar nuestras nuevas propiedades
+  const [filteredObjects, setFilteredObjects] = useState(objects);
+  const [searchObj, setSearchObj] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  
+  // NUEVO: Estado para la categoría
+  const [categoryFilter, setCategoryFilter] = useState(''); 
 
-    useEffect(() => {
+  useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      // FILTRADO
-      let processedObjects;
+      
+      // 1. INICIAMOS CON TODOS LOS OBJETOS
+      let processedObjects = objects;
 
-      if(searchObj === '') {
-        processedObjects = objects;
-      } else {
+      // 2. FILTRO POR TEXTO (Buscador)
+      if (searchObj !== '') {
         const lowercasedFilter = searchObj.toLowerCase();
-        processedObjects = objects.filter(obj => 
+        processedObjects = processedObjects.filter(obj => 
           obj.title.toLowerCase().includes(lowercasedFilter) ||
           obj.location.toLowerCase().includes(lowercasedFilter)
         );
       }
 
-      // ORDENAMIENTO
+      // 3. FILTRO POR CATEGORÍA
+      if (categoryFilter !== '' && categoryFilter !== 'Todas') {
+        processedObjects = processedObjects.filter(obj => 
+          obj.category === categoryFilter
+        );
+      }
+
+      // 4. ORDENAMIENTO (Corregido)
       const sortedObjects = [...processedObjects];
 
-      if(sortBy === 'newest') {
-        sortedObjects.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      } else {
-        sortedObjects.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      }
+      sortedObjects.sort((a, b) => {
+        // Usamos rawDate (fecha en formato máquina) si existe, si no, intentamos con la normal
+        const dateA = new Date(a.rawDate || a.date).getTime();
+        const dateB = new Date(b.rawDate || b.date).getTime();
+
+        if (sortBy === 'newest') {
+          return dateB - dateA; // Más recientes primero
+        } else {
+          return dateA - dateB; // Más antiguos primero
+        }
+      });
 
       setFilteredObjects(sortedObjects);      
 
     }, 500);
+    
     return () => clearTimeout(debounceTimer);
-  }, [searchObj, sortBy, objects]);
+  }, [searchObj, sortBy, categoryFilter, objects]); // Agregamos categoryFilter aquí
 
-  return { searchObj, setSearchObj, sortBy, setSortBy, filteredObjects}
-} 
+  return { 
+    searchObj, setSearchObj, 
+    sortBy, setSortBy, 
+    categoryFilter, setCategoryFilter, // Exportamos los controles de categoría
+    filteredObjects
+  };
+}

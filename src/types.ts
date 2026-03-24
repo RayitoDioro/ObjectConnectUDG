@@ -7,6 +7,7 @@ export type Thread = {
 export type Category = {
   id: number;
   name: string;
+  created_at: string;
 };
 
 export type Message = {
@@ -28,7 +29,18 @@ export type UserProfile = {
   last_name: string;
   photo_profile_url: string | null;
   role_id: number | null;
+  creation_date: string | null;
 };
+
+export type Role = {
+  id: number;
+  role_name: string;
+  descripcion: string;
+  created_at: string;
+}
+
+export type UserWithRole = 
+  UserProfile & { Roles?: Role } ;
 
 export type CardProps = {
   id: number;
@@ -95,3 +107,23 @@ export type AlertMessage = {
   title: string;
   description: string;
 };
+
+export type Statistics = {
+  totalUsers: number;
+  totalRoles: number;
+  totalPosts: number;
+  activeUsers: number;
+};
+
+export interface RolePermissions {
+  roleId: number;
+  roleName: string;
+  permissions: string[]; // Array de strings como 'create_posts', 'delete_users', etc
+}
+
+export interface Permission {
+  id: number;
+  permiso: string;
+  created_at : string;
+  descripcion: string;
+}

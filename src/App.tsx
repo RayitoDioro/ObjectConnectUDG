@@ -12,6 +12,14 @@ import { AuthProvider } from './context/AuthContext.tsx';
 import { ProtectedRoute } from './components/common/ProtectedRoute.tsx';
 import Chats from './components/pages/chats/Chats.tsx';
 import ProfileSettings from './ProfileSettings';
+import { ProtectedRouteAdmin } from './components/common/ProtectedRouteAdmin.tsx';
+import { AdminDashboard } from './components/pages/admin/AdminDashboard.tsx';
+import { AdminLayout } from './layouts/AdminLayout.tsx';
+import { UsersTable } from './components/pages/admin/users/UsersTable.tsx';
+import { RolesTable } from './components/pages/admin/roles/RolesTable';
+import { PermissionsTable } from './components/pages/admin/permissions/PermissionsTable.tsx';
+import { CategoriesTable } from './components/pages/admin/categories/CategoriesTable.tsx';
+import { RolePermissionsTable } from './components/pages/admin/rolePermissions/RolePermissionsTable.tsx';
 
 function App() {
   // Elimina el useAuth aquí, solo usa el Provider
@@ -67,6 +75,76 @@ function App() {
               <ProtectedRoute>
                 <MainLayout><ProfileSettings /></MainLayout>
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/admin'
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <AdminDashboard/>
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/usuarios"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <UsersTable />
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/roles"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <RolesTable />
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/permisos"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <PermissionsTable />
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/rolePermisos"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <RolePermissionsTable />
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/categorias"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <CategoriesTable />
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/posts"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <div>Gestionar Posts</div>
+                </AdminLayout>
+              </ProtectedRouteAdmin>
             }
           />
           <Route path="/login" element={<Login />} />
