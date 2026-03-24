@@ -1,21 +1,25 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 // Layouts y paginas
-import { MainLayout } from "./layouts/MainLayout.tsx";
-import Home from "./components/pages/home/Home.tsx";
-import Login from "./components/pages/login/Login.tsx";
-import LostObjects from "./components/pages/lostobjects/LostObjects.tsx";
-import FoundObjects from "./components/pages/foundobjects/foundobjects.tsx";
-import PublishObject from "./components/pages/publishobject/PublishObject.tsx"; // 1. Importamos el nuevo componente
-import Profile from "./components/pages/profile/Profile.tsx";
-import { AuthProvider } from "./context/AuthContext.tsx";
-import { ProtectedRoute } from "./components/common/ProtectedRoute.tsx";
-import Chats from "./components/pages/chats/Chats.tsx";
-import ProfileSettings from "./ProfileSettings";
-import { ProtectedRouteAdmin } from "./components/common/ProtectedRouteAdmin.tsx";
-import { AdminDashboard } from "./components/pages/admin/AdminDashboard.tsx";
-import { AdminLayout } from "./layouts/AdminLayout.tsx";
-import { UsersTable } from "./components/pages/admin/users/UsersTable.tsx";
+import { MainLayout } from './layouts/MainLayout.tsx';
+import Home from './components/pages/home/Home.tsx';
+import Login from './components/pages/login/Login.tsx';
+import LostObjects from './components/pages/lostobjects/LostObjects.tsx';
+import FoundObjects from './components/pages/foundobjects/foundobjects.tsx';
+import PublishObject from './components/pages/publishobject/PublishObject.tsx'; // 1. Importamos el nuevo componente
+import Profile from './components/pages/profile/Profile.tsx';
+import { AuthProvider } from './context/AuthContext.tsx';
+import { ProtectedRoute } from './components/common/ProtectedRoute.tsx';
+import Chats from './components/pages/chats/Chats.tsx';
+import ProfileSettings from './ProfileSettings';
+import { ProtectedRouteAdmin } from './components/common/ProtectedRouteAdmin.tsx';
+import { AdminDashboard } from './components/pages/admin/AdminDashboard.tsx';
+import { AdminLayout } from './layouts/AdminLayout.tsx';
+import { UsersTable } from './components/pages/admin/users/UsersTable.tsx';
+import { RolesTable } from './components/pages/admin/roles/RolesTable';
+import { PermissionsTable } from './components/pages/admin/permissions/PermissionsTable.tsx';
+import { CategoriesTable } from './components/pages/admin/categories/CategoriesTable.tsx';
+import { RolePermissionsTable } from './components/pages/admin/rolePermissions/RolePermissionsTable.tsx';
 import MetricasML from "./pages/admin/MetricasML.tsx";
 
 function App() {
@@ -127,7 +131,37 @@ function App() {
             element={
               <ProtectedRouteAdmin>
                 <AdminLayout>
-                  <div>Gestionar Roles</div>
+                  <RolesTable />
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/permisos"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <PermissionsTable />
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/rolePermisos"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <RolePermissionsTable />
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/categorias"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <CategoriesTable />
                 </AdminLayout>
               </ProtectedRouteAdmin>
             }

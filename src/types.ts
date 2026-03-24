@@ -7,6 +7,7 @@ export type Thread = {
 export type Category = {
   id: number;
   name: string;
+  created_at: string;
 };
 
 export type Message = {
@@ -35,6 +36,7 @@ export type Role = {
   id: number;
   role_name: string;
   descripcion: string;
+  created_at: string;
 }
 
 export type UserWithRole = 
@@ -112,3 +114,16 @@ export type Statistics = {
   totalPosts: number;
   activeUsers: number;
 };
+
+export interface RolePermissions {
+  roleId: number;
+  roleName: string;
+  permissions: string[]; // Array de strings como 'create_posts', 'delete_users', etc
+}
+
+export interface Permission {
+  id: number;
+  permiso: string;
+  created_at : string;
+  descripcion: string;
+}
