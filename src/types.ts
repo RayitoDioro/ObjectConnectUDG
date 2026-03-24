@@ -35,6 +35,7 @@ export type Role = {
   id: number;
   role_name: string;
   descripcion: string;
+  created_at: string;
 }
 
 export type UserWithRole = 
@@ -112,3 +113,9 @@ export type Statistics = {
   totalPosts: number;
   activeUsers: number;
 };
+
+export interface RolePermissions {
+  roleId: number;
+  roleName: string;
+  permissions: string[]; // Array de strings como 'create_posts', 'delete_users', etc
+}
