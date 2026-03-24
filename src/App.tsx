@@ -18,6 +18,7 @@ import { AdminLayout } from './layouts/AdminLayout.tsx';
 import { UsersTable } from './components/pages/admin/users/UsersTable.tsx';
 import { RolesTable } from './components/pages/admin/roles/RolesTable';
 import { PermissionsTable } from './components/pages/admin/permissions/PermissionsTable.tsx';
+import { CategoriesTable } from './components/pages/admin/categories/CategoriesTable.tsx';
 
 function App() {
   // Elimina el useAuth aquí, solo usa el Provider
@@ -111,6 +112,16 @@ function App() {
               <ProtectedRouteAdmin>
                 <AdminLayout>
                   <PermissionsTable />
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/categorias"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <CategoriesTable />
                 </AdminLayout>
               </ProtectedRouteAdmin>
             }
