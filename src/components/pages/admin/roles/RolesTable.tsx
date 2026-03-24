@@ -210,7 +210,7 @@ export const RolesTable = () => {
             <Text fontWeight="bold" color="brand.blue" mb={2} fontSize="sm">
               Ordenar por
             </Text>
-            <HStack spacing={0}>
+            <HStack spacing={1}>
               <Button
                 flex={1}
                 size="sm"
