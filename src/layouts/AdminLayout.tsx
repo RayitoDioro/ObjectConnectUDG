@@ -20,7 +20,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     { label: 'Permisos', path: '/admin/permisos' },
     { label: 'Permisos de rol', path: '/admin/rolePermisos' },
     { label: 'Categorias', path: '/admin/categorias' },
-    { label: 'Posts', path: '/admin/posts' },
+    // { label: 'Posts', path: '/admin/posts' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
