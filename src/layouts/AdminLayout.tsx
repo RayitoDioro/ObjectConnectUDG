@@ -66,6 +66,27 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
       {/* Main Content */}
       <Box flex={1} overflow="auto">
+        {/* Header Desktop */}
+      <Box
+        bg="brand.blue"
+        color="white"
+        p={4}
+        display={{ base: 'none', md: 'flex' }}
+        justifyContent="flex-end"
+        alignItems="center"
+        boxShadow="md"
+      >
+        <IconButton
+          aria-label="Regresar a la aplicación"
+          icon={<ArrowBackIcon w={6} h={6} />}
+          bg="brand.yellow"
+          color="brand.blue"
+          _hover={{ bg: 'white', color: 'brand.blue' }}
+          onClick={() => navigate('/')}
+          fontWeight="bold"
+        />
+      </Box>
+
         {/* Header Mobile */}
         <Box
           bg="brand.blue"
@@ -76,9 +97,20 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
           alignItems="center"
           boxShadow="md"
         >
-          <Heading size="sm" color="brand.yellow">
-            Panel Administrativo
-          </Heading>
+          <HStack spacing={2}>
+            <IconButton
+              aria-label="Regresar a la aplicación"
+              icon={<ArrowBackIcon w={5} h={5} />}
+              bg="brand.yellow"
+              color="brand.blue"
+              _hover={{ bg: 'white', color: 'brand.blue' }}
+              onClick={() => navigate('/')}
+              size="sm"
+            />
+            <Heading size="sm" color="brand.yellow">
+              Panel Administrativo
+            </Heading>
+          </HStack>
           <IconButton
             aria-label="Abrir menú"
             icon={<HamburgerIcon />}
