@@ -51,11 +51,6 @@ export const RolesTable = () => {
   // Permisos
   const { hasPermission } = usePermissions();
 
-  useEffect(() => {
-    console.log('EDIT_ROLES permiso:', hasPermission(PERMISSIONS.EDIT_ROLES));
-    console.log('DELETE_ROLES permiso:', hasPermission(PERMISSIONS.DELETE_ROLES));
-  }, [hasPermission]);
-
   const {
     isOpen: isFormOpen,
     onOpen: onFormOpen,

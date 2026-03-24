@@ -87,11 +87,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     fetchProfileOnSessionChange();
   }, [session]);
 
-  useEffect(() => {
-    console.log('roleId actualizado:', roleId);
-    console.log('isAdmin actualizado:', isAdmin);
-  }, [roleId, isAdmin]);
-
   // Datos y funciones que se van a compartir con el contexto
   const value = {
     session,
