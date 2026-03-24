@@ -17,6 +17,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     { label: 'Usuarios', path: '/admin/usuarios' },
     { label: 'Roles', path: '/admin/roles' },
     { label: 'Permisos', path: '/admin/permisos' },
+    { label: 'Permisos de rol', path: '/admin/rolePermisos' },
     { label: 'Categorias', path: '/admin/categorias' },
     { label: 'Posts', path: '/admin/posts' },
   ];
