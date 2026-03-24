@@ -1,7 +1,7 @@
 import { Box, Flex, VStack, HStack, Heading, Button, Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerBody, useDisclosure, IconButton } from '@chakra-ui/react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { HamburgerIcon, ArrowBackIcon } from '@chakra-ui/icons';
-import { type ReactNode } from 'react';
+import { HamburgerIcon, ArrowBackIcon, CloseIcon } from '@chakra-ui/icons';
+import { type ReactNode, useState } from 'react';
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -11,6 +11,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const navItems = [
     { label: 'Dashboard', path: '/admin' },
@@ -47,12 +48,14 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     <Flex minH="100vh" bg="gray.100">
       {/* Sidebar Desktop */}
       <Box
-        w="250px"
+        w={isSidebarCollapsed ? '0px' : '250px'}
         bg="brand.blue"
         color="white"
-        p={6}
+        p={isSidebarCollapsed ? 0 : 6}
         display={{ base: 'none', md: 'block' }}
         boxShadow="lg"
+        transition="all 0.3s ease-in-out"
+        overflow="hidden"
       >
         <Heading size="md" mb={8} color="brand.yellow">
           Panel Administrativo
@@ -72,10 +75,19 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         color="white"
         p={4}
         display={{ base: 'none', md: 'flex' }}
-        justifyContent="flex-end"
+        justifyContent="space-between"
         alignItems="center"
         boxShadow="md"
       >
+        <IconButton
+            aria-label={isSidebarCollapsed ? 'Expandir menú' : 'Contraer menú'}
+            icon={isSidebarCollapsed ? <HamburgerIcon /> : <CloseIcon />}
+            bg="brand.yellow"
+            color="brand.blue"
+            _hover={{ bg: 'white', color: 'brand.blue' }}
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            fontWeight="bold"
+          />
         <IconButton
           aria-label="Regresar a la aplicación"
           icon={<ArrowBackIcon w={6} h={6} />}
