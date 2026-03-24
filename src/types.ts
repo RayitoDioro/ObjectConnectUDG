@@ -119,3 +119,10 @@ export interface RolePermissions {
   roleName: string;
   permissions: string[]; // Array de strings como 'create_posts', 'delete_users', etc
 }
+
+export interface Permission {
+  id: number;
+  permiso: string;
+  created_at : string;
+  descripcion: string;
+}
