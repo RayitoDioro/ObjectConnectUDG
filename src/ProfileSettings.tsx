@@ -3,7 +3,7 @@ import { supabaseClient } from './supabaseClient';
 import { useAuth } from './context/AuthContext'; 
 import { 
   Box, Button, FormControl, FormLabel, Input, VStack, Heading, 
-  Avatar, useToast, Container, Flex 
+  Avatar, useToast, Container, Flex, Badge
 } from '@chakra-ui/react';
 
 export default function ProfileSettings() {
@@ -15,6 +15,7 @@ export default function ProfileSettings() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [roleName, setRoleName] = useState<string | null>(null);
 
   useEffect(() => {
     if (session?.user) {
@@ -29,7 +30,7 @@ export default function ProfileSettings() {
 
       const { data, error } = await supabaseClient
         .from('user_profile')
-        .select('first_name, last_name, photo_profile_url')
+        .select('first_name, last_name, photo_profile_url, role_id')
         .eq('user_id', user.id)
         .single();
 
@@ -39,6 +40,19 @@ export default function ProfileSettings() {
         setFirstName(data.first_name || '');
         setLastName(data.last_name || '');
         setAvatarUrl(data.photo_profile_url);
+
+        // Obtener el nombre del rol
+        if (data.role_id) {
+          const { data: roleData, error: roleError } = await supabaseClient
+            .from('Roles')
+            .select('role_name')
+            .eq('id', data.role_id)
+            .single();
+
+          if (!roleError && roleData) {
+            setRoleName(roleData.role_name);
+          }
+        }
       }
     } catch (error) {
       console.error('Error cargando perfil:', error);
@@ -147,6 +161,23 @@ export default function ProfileSettings() {
                 <input type="file" hidden accept="image/*" onChange={uploadAvatar} />
               </Button>
             </Flex>
+
+            {/* Badge del Rol */}
+            {roleName && (
+              <Box textAlign="center" w="full">
+                <Badge 
+                  bg="brand.blue" 
+                  color="brand.yellow" 
+                  fontSize="md" 
+                  px={4} 
+                  py={2}
+                  borderRadius="full"
+                  fontWeight="bold"
+                >
+                  {roleName}
+                </Badge>
+              </Box>
+            )}
 
             {/* Formulario */}
             <FormControl>

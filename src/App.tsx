@@ -1,8 +1,8 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 // Layouts y paginas
 import { MainLayout } from './layouts/MainLayout.tsx';
-import Home from './components/pages/home/Home.tsx'
+import Home from './components/pages/home/Home.tsx';
 import Login from './components/pages/login/Login.tsx';
 import LostObjects from './components/pages/lostobjects/LostObjects.tsx';
 import FoundObjects from './components/pages/foundobjects/foundobjects.tsx';
@@ -20,6 +20,7 @@ import { RolesTable } from './components/pages/admin/roles/RolesTable';
 import { PermissionsTable } from './components/pages/admin/permissions/PermissionsTable.tsx';
 import { CategoriesTable } from './components/pages/admin/categories/CategoriesTable.tsx';
 import { RolePermissionsTable } from './components/pages/admin/rolePermissions/RolePermissionsTable.tsx';
+import MetricasML from "./pages/admin/MetricasML.tsx";
 
 function App() {
   // Elimina el useAuth aquí, solo usa el Provider
@@ -27,21 +28,41 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<MainLayout> <Home /> </MainLayout>} />
+          <Route
+            path="/"
+            element={
+              <MainLayout>
+                {" "}
+                <Home />{" "}
+              </MainLayout>
+            }
+          />
           <Route
             path="/objetos-perdidos"
             element={
               <ProtectedRoute>
-                <MainLayout><LostObjects /></MainLayout>
+                <MainLayout>
+                  <LostObjects />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
-          <Route path="/objetos-encontrados" element={<MainLayout> <FoundObjects/> </MainLayout>} />
+          <Route
+            path="/objetos-encontrados"
+            element={
+              <MainLayout>
+                {" "}
+                <FoundObjects />{" "}
+              </MainLayout>
+            }
+          />
           <Route
             path="/publicar-objeto"
             element={
               <ProtectedRoute>
-                <MainLayout><PublishObject /></MainLayout>
+                <MainLayout>
+                  <PublishObject />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
@@ -49,7 +70,9 @@ function App() {
             path="/chats/:threadId?"
             element={
               <ProtectedRoute>
-                <MainLayout><Chats /></MainLayout>
+                <MainLayout>
+                  <Chats />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
@@ -57,7 +80,9 @@ function App() {
             path="/perfil"
             element={
               <ProtectedRoute>
-                <MainLayout><Profile /></MainLayout>
+                <MainLayout>
+                  <Profile />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
@@ -65,7 +90,9 @@ function App() {
             path="/perfil/:userId"
             element={
               <ProtectedRoute>
-                <MainLayout><Profile /></MainLayout>
+                <MainLayout>
+                  <Profile />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
@@ -73,16 +100,18 @@ function App() {
             path="/settings"
             element={
               <ProtectedRoute>
-                <MainLayout><ProfileSettings /></MainLayout>
+                <MainLayout>
+                  <ProfileSettings />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
           <Route
-            path='/admin'
+            path="/admin"
             element={
               <ProtectedRouteAdmin>
                 <AdminLayout>
-                  <AdminDashboard/>
+                  <AdminDashboard />
                 </AdminLayout>
               </ProtectedRouteAdmin>
             }
@@ -143,6 +172,16 @@ function App() {
               <ProtectedRouteAdmin>
                 <AdminLayout>
                   <div>Gestionar Posts</div>
+                </AdminLayout>
+              </ProtectedRouteAdmin>
+            }
+          />
+          <Route
+            path="/admin/metricas"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout>
+                  <MetricasML />
                 </AdminLayout>
               </ProtectedRouteAdmin>
             }

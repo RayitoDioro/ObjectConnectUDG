@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Flex, VStack, Text, Input, Button, Avatar, Heading, Spinner, IconButton, HStack, Spacer } from '@chakra-ui/react';
+import { Box, Flex, VStack, Text, Input, Avatar, Heading, Spinner, IconButton, HStack, Spacer } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabaseClient } from '@/supabaseClient';

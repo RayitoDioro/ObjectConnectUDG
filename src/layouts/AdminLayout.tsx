@@ -21,6 +21,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     { label: 'Permisos de rol', path: '/admin/rolePermisos' },
     { label: 'Categorias', path: '/admin/categorias' },
     // { label: 'Posts', path: '/admin/posts' },
+    {label: "Métricas ML", path: "/admin/metricas" }
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -29,10 +30,10 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     <Button
       w="full"
       justifyContent="start"
-      bg={isActive(path) ? 'brand.yellow' : 'transparent'}
-      color={isActive(path) ? 'brand.blue' : 'white'}
-      fontWeight={isActive(path) ? 'bold' : 'normal'}
-      _hover={{ bg: 'brand.yellow', color: 'brand.blue' }}
+      bg={isActive(path) ? "brand.yellow" : "transparent"}
+      color={isActive(path) ? "brand.blue" : "white"}
+      fontWeight={isActive(path) ? "bold" : "normal"}
+      _hover={{ bg: "brand.yellow", color: "brand.blue" }}
       onClick={() => {
         navigate(path);
         onClose();
@@ -104,7 +105,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
           bg="brand.blue"
           color="white"
           p={4}
-          display={{ base: 'flex', md: 'none' }}
+          display={{ base: "flex", md: "none" }}
           justifyContent="space-between"
           alignItems="center"
           boxShadow="md"
@@ -128,7 +129,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             icon={<HamburgerIcon />}
             variant="outline"
             borderColor="brand.yellow"
-            _hover={{ bg: 'brand.yellow', color: 'brand.blue' }}
+            _hover={{ bg: "brand.yellow", color: "brand.blue" }}
             onClick={onOpen}
           />
         </Box>
@@ -144,7 +145,11 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             <DrawerBody>
               <VStack spacing={2} align="stretch">
                 {navItems.map((item) => (
-                  <NavButton key={item.path} label={item.label} path={item.path} />
+                  <NavButton
+                    key={item.path}
+                    label={item.label}
+                    path={item.path}
+                  />
                 ))}
               </VStack>
             </DrawerBody>
