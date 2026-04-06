@@ -50,6 +50,7 @@ export type CardProps = {
   title: string;
   date: string;
   location: string;
+  locationAreaName?: string;
 };
 
 export type FullCardProps = {
@@ -61,6 +62,7 @@ export type FullCardProps = {
   date: string;
   rawDate: string;
   location: string;
+  locationAreaName?: string;
   description: string;
   userId: string;
   authorName: string;
@@ -75,6 +77,8 @@ export type Post = {
     description: string | null;
     photo_url: string | null;
     location: string | null;
+    location_area_id?: number;
+    location_area_name?: string | null;
     user_id: string;
     post_state_id: number;
     date_was_found: string | null;

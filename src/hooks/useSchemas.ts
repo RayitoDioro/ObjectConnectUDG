@@ -4,6 +4,7 @@ export type PostPayload = {
     title: string;
     description: string;
     foundWhere?: string;
+    location_area_id?: number;
     dateFound?: string | null;
     product_category_id?: number;
 };
@@ -11,6 +12,12 @@ export type PostPayload = {
 export type Category = {
     id: number;
     name: string;
+    created_at?: string;
+};
+
+export type LocationArea = {
+    id: number;
+    location: string;
 };
 
 /**
@@ -54,6 +61,7 @@ export function useSchemas() {
                 title: payload.title,
                 description: payload.description,
                 location: payload.foundWhere ?? null,
+                location_area_id: payload.location_area_id ?? null,
                 photo_url: publicUrl,
                 user_id: userId,
                 post_state_id: 1,
@@ -73,13 +81,25 @@ export function useSchemas() {
     }
 
     async function getPosts(postStateId?: number) {
-        let query = supabaseClient.from('posts').select('*');
+        let query = supabaseClient
+            .from('posts')
+            .select(`
+                *,
+                location_area (
+                    location
+                )
+            `);
+        
         if (postStateId) query = query.eq('post_state_id', postStateId);
 
         const { data, error } = await query;
         if (error) throw error;
 
-        return data;
+        // Aplanamos el resultado para que sea más fácil de usar
+        return data.map(post => ({
+            ...post,
+            location_area_name: post.location_area?.location || null
+        }));
     }
 
     async function getCategories(): Promise<Category[]> {
@@ -89,6 +109,15 @@ export function useSchemas() {
             throw error;
         }
         return (data ?? []) as Category[];
+    }
+
+    async function getLocationAreas(): Promise<LocationArea[]> {
+        const { data, error } = await supabaseClient.from('location_area').select('id, location');
+        if (error) {
+            console.error('Error fetching location areas:', error);
+            throw error;
+        }
+        return (data ?? []) as LocationArea[];
     }
 
     /**
@@ -150,5 +179,5 @@ export function useSchemas() {
             return null;
         }
     }
-    return { uploadPostWithImage, getPosts, getCategories, getUserById, createThreadForPost };
+    return { uploadPostWithImage, getPosts, getCategories, getLocationAreas, getUserById, createThreadForPost };
 }

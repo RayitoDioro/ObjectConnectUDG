@@ -7,13 +7,18 @@ type CardProps = {
   title: string;
   date: string;
   location: string;
+  locationAreaName?: string;
 };
 
-const Card = ({ status, imageUrl, altText, title, date, location }: CardProps) => {
+const Card = ({ status, imageUrl, altText, title, date, location, locationAreaName }: CardProps) => {
   const isLost = status === 'lost';
   const tagText = isLost ? '¡PERDIDO!' : '¡ENCONTRADO!';
   const cardStyle = isLost ? styles.lost : styles.found;
   const tagStyle = isLost ? styles.lostTag : styles.foundTag;
+
+  const displayLocation = locationAreaName 
+    ? `${locationAreaName} - ${location}` 
+    : location;
 
   return (
     <article className={`${styles.card} ${cardStyle}`}>
@@ -22,7 +27,7 @@ const Card = ({ status, imageUrl, altText, title, date, location }: CardProps) =
         <span className={`${styles.statusTag} ${tagStyle}`}>{tagText}</span>
         <h4>{title}</h4>
         <p className={styles.meta}>Reportado: {date}</p>
-        <p className={styles.meta}>{isLost ? 'Ubicación' : 'Descripción'}: {location}</p>
+        <p className={styles.meta}>{isLost ? 'Ubicación' : 'Descripción'}: {displayLocation}</p>
       </div>
     </article>
   );

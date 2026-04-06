@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { 
-  Box, SimpleGrid, Spinner, Heading, Text, Container, VStack, Center, useDisclosure 
+  Box, SimpleGrid, Spinner, Heading, Text, Container, VStack, Center, useDisclosure,
+  Table, Thead, Tbody, Tr, Th, Td, Badge, Icon, Collapse, Button, Flex, HStack
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
+import { FaMapMarkerAlt, FaBoxOpen, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 // IMPORTACIONES Y RUTAS ABSOLUTAS
 import { useSchemas } from '@/hooks/useSchemas'; 
@@ -24,6 +26,7 @@ const FoundObjects = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
 
+  const [allPostsForStats, setAllPostsForStats] = useState<Post[]>([]);
   const [foundPosts, setFoundPosts] = useState<FullCardProps[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,8 +36,10 @@ const FoundObjects = () => {
   const [sortBy, setSortBy] = useState('newest'); 
   const [categoryFilter, setCategoryFilter] = useState('Todas'); 
 
-  // CONTROLADORES DEL MODAL
+  // CONTROLADORES DEL MODAL Y COLLAPSE
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isTopLocOpen, onToggle: onToggleTopLoc } = useDisclosure();
+  const { isOpen: isTopCatOpen, onToggle: onToggleTopCat } = useDisclosure();
   const [selectedObject, setSelectedObject] = useState<FullCardProps | null>(null);
 
   // 1. CARGA INICIAL OPTIMIZADA Y SIN BUCLES
@@ -45,10 +50,16 @@ const FoundObjects = () => {
         
         // A. Bajamos las categorías
         const cats = await getCategories();
-        setDbCategories(cats.map((c: any) => ({ ...c, id: Number(c.id) })));
+        setDbCategories(cats.map((c: any) => ({ 
+          id: Number(c.id), 
+          name: c.name,
+          created_at: c.created_at || new Date().toISOString()
+        })));
 
-        // B. Bajamos publicaciones y filtramos las encontradas
+        // B. Bajamos todas las publicaciones para las estadísticas
         const allPosts: Post[] = await getPosts();
+        setAllPostsForStats(allPosts);
+        
         const onlyFound = allPosts.filter(post => post.post_state_id === 2);
 
         // C. Buscamos a los autores de estos posts en un solo viaje
@@ -79,6 +90,7 @@ const FoundObjects = () => {
             date: new Date(post.date_was_found || post.created_at).toLocaleDateString(),
             rawDate: post.date_was_found || post.created_at,
             location: post.location || 'Ubicación no especificada',
+            locationAreaName: post.location_area_name || '',
             description: post.description || 'Sin descripción',
             userId: post.user_id,
             categoryId: (post as any).product_category_id, 
@@ -96,7 +108,38 @@ const FoundObjects = () => {
     };
 
     fetchFoundObjects();
-  }, []); // <--- ¡AQUÍ ESTÁ LA MAGIA! Arreglo vacío para que no haya bucle infinito.
+  }, []);
+
+  // CÁLCULO DE ESTADÍSTICAS TOP 3
+  const stats = useMemo(() => {
+    // Top Lugares
+    const locCounts: Record<string, number> = {};
+    // Top Categorías
+    const catCounts: Record<string, number> = {};
+
+    allPostsForStats.forEach(post => {
+      // Lugar
+      const loc = post.location_area_name || "Desconocido";
+      locCounts[loc] = (locCounts[loc] || 0) + 1;
+
+      // Categoría
+      const catId = post.product_category_id;
+      const catName = dbCategories.find(c => c.id === catId)?.name || "Otros";
+      catCounts[catName] = (catCounts[catName] || 0) + 1;
+    });
+
+    const topLocations = Object.entries(locCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3)
+      .map(([name, count]) => ({ name, count }));
+
+    const topCategories = Object.entries(catCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3)
+      .map(([name, count]) => ({ name, count }));
+
+    return { topLocations, topCategories };
+  }, [allPostsForStats, dbCategories]);
 
   // Aplicar los filtros
   const filteredObjects = useMemo(() => {
@@ -161,6 +204,91 @@ const FoundObjects = () => {
             </Text>
           </Box>
 
+          {/* SECCIÓN DE ESTADÍSTICAS TOP 3 */}
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={4} alignItems="start">
+            {/* Card Top Lugares */}
+            <Box 
+              bg="white" p={6} borderRadius="xl" shadow="md" borderLeft="4px solid" borderColor="blue.500"
+              cursor="pointer" onClick={onToggleTopLoc} transition="all 0.2s" _hover={{ shadow: "lg", transform: "translateY(-2px)" }}
+              height="fit-content"
+            >
+              <Flex justify="space-between" align="center">
+                <HStack spacing={4}>
+                  <Center bg="blue.50" p={3} borderRadius="lg">
+                    <Icon as={FaMapMarkerAlt} w={6} h={6} color="blue.500" />
+                  </Center>
+                  <VStack align="start" spacing={0}>
+                    <Text fontSize="sm" color="gray.500" fontWeight="bold">TOP 3</Text>
+                    <Heading size="md" color="gray.700">Lugares Susceptibles</Heading>
+                  </VStack>
+                </HStack>
+                <Icon as={isTopLocOpen ? FaChevronUp : FaChevronDown} color="gray.400" />
+              </Flex>
+              
+              <Collapse in={isTopLocOpen} animateOpacity>
+                <Box mt={4} pt={4} borderTop="1px solid" borderColor="gray.100">
+                  <Table size="sm" variant="simple">
+                    <Thead>
+                      <Tr>
+                        <Th>Lugar</Th>
+                        <Th isNumeric>Reportes</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {stats.topLocations.map((loc, idx) => (
+                        <Tr key={idx}>
+                          <Td fontWeight="medium">{loc.name}</Td>
+                          <Td isNumeric><Badge colorScheme="blue" borderRadius="full" px={2}>{loc.count}</Badge></Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </Box>
+              </Collapse>
+            </Box>
+
+            {/* Card Top Artículos */}
+            <Box 
+              bg="white" p={6} borderRadius="xl" shadow="md" borderLeft="4px solid" borderColor="orange.500"
+              cursor="pointer" onClick={onToggleTopCat} transition="all 0.2s" _hover={{ shadow: "lg", transform: "translateY(-2px)" }}
+              height="fit-content"
+            >
+              <Flex justify="space-between" align="center">
+                <HStack spacing={4}>
+                  <Center bg="orange.50" p={3} borderRadius="lg">
+                    <Icon as={FaBoxOpen} w={6} h={6} color="orange.500" />
+                  </Center>
+                  <VStack align="start" spacing={0}>
+                    <Text fontSize="sm" color="gray.500" fontWeight="bold">TOP 3</Text>
+                    <Heading size="md" color="gray.700">Artículos Susceptibles</Heading>
+                  </VStack>
+                </HStack>
+                <Icon as={isTopCatOpen ? FaChevronUp : FaChevronDown} color="gray.400" />
+              </Flex>
+
+              <Collapse in={isTopCatOpen} animateOpacity>
+                <Box mt={4} pt={4} borderTop="1px solid" borderColor="gray.100">
+                  <Table size="sm" variant="simple">
+                    <Thead>
+                      <Tr>
+                        <Th>Categoría</Th>
+                        <Th isNumeric>Reportes</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {stats.topCategories.map((cat, idx) => (
+                        <Tr key={idx}>
+                          <Td fontWeight="medium">{cat.name}</Td>
+                          <Td isNumeric><Badge colorScheme="orange" borderRadius="full" px={2}>{cat.count}</Badge></Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </Box>
+              </Collapse>
+            </Box>
+          </SimpleGrid>
+
           <Box w="100%">
             <FilterSortControls
               searchObj={searchObj} setSearchObj={setSearchObj}
@@ -189,6 +317,7 @@ const FoundObjects = () => {
                       status={post.status} imageUrl={post.imageUrl}
                       altText={post.altText} title={post.title}
                       date={post.date} location={post.location}
+                      locationAreaName={post.locationAreaName}
                     />
                   </Box>
                 ))}

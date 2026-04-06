@@ -89,6 +89,7 @@ const Home = () => {
             date: new Date(post.date_was_found || post.created_at).toLocaleDateString(),
             rawDate: post.date_was_found || post.created_at,
             location: post.location || "Sin ubicación",
+            locationAreaName: post.location_area_name || "",
             description: post.description || "Sin descripción proporcionada.",
             
             category: getCategoryName((post as any).product_category_id),

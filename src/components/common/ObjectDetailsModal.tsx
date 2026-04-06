@@ -51,7 +51,9 @@ const ObjectDetailsModal = ({
               </HStack>
               <VStack align="end" spacing={0}>
                 <Text fontSize="xs" color="gray.500">{selectedObj.date}</Text>
-                <Text fontSize="xs" color="gray.500">{selectedObj.location}</Text>
+                <Text fontSize="xs" color="gray.500">
+                  {selectedObj.locationAreaName ? `${selectedObj.locationAreaName} - ` : ''}{selectedObj.location}
+                </Text>
               </VStack>
             </Flex>
             
@@ -84,7 +86,13 @@ const ObjectDetailsModal = ({
         </ModalBody>
         
         <ModalFooter>
-          {selectedObj.authorId !== currentUserId ? (
+          {selectedObj.status === 'found' ? (
+            <Box w="full" p={3} bg="green.50" borderRadius="md" border="1px solid" borderColor="green.200">
+              <Text w="full" textAlign="center" fontSize="sm" color="green.700" fontStyle="italic" fontWeight="bold">
+                Este objeto ya fue devuelto a su dueño. No se pueden iniciar nuevos chats.
+              </Text>
+            </Box>
+          ) : selectedObj.authorId !== currentUserId ? (
             <Button 
               colorScheme="blue" 
               w="full" 

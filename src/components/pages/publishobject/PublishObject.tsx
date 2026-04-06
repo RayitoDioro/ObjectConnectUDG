@@ -24,7 +24,11 @@ import {
 import { AttachmentIcon, DeleteIcon } from "@chakra-ui/icons";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { useSchemas, type PostPayload } from "../../../hooks/useSchemas";
+import {
+  useSchemas,
+  type PostPayload,
+  type LocationArea,
+} from "../../../hooks/useSchemas";
 import type { AlertMessage, Category } from "@/types";
 
 const PublishObject = () => {
@@ -36,25 +40,40 @@ const PublishObject = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [locationAreas, setLocationAreas] = useState<LocationArea[]>([]);
 
   const { session } = useAuth();
-  const { uploadPostWithImage, getCategories } = useSchemas();
+  const { uploadPostWithImage, getCategories, getLocationAreas } = useSchemas();
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getCategories();
-        if (data) setCategories(data);
+        console.log("Iniciando carga de datos...");
+        const [categoriesData, locationsData] = await Promise.all([
+          getCategories(),
+          getLocationAreas(),
+        ]);
+
+        if (categoriesData) setCategories(categoriesData);
+        if (locationsData) setLocationAreas(locationsData);
       } catch (error) {
-        console.error("Error fetching categories:", error);
-        showAlert("error", "Error", "No se pudieron cargar las categorías.");
+        console.error("Error fetching data:", error);
+        showAlert(
+          "error",
+          "Error",
+          "No se pudieron cargar los datos necesarios.",
+        );
       }
     };
-    fetchCategories();
+    fetchData();
   }, []);
 
   // Función para mostrar alertas
-  const showAlert = (type: "success" | "error", title: string, description: string) => {
+  const showAlert = (
+    type: "success" | "error",
+    title: string,
+    description: string,
+  ) => {
     setAlertMessage({ type, title, description });
     setTimeout(() => setAlertMessage(null), 3000);
   };
@@ -62,11 +81,14 @@ const PublishObject = () => {
   // Función que se ejecuta cuando el usuario selecciona archivos
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
-      console.log('Archivos seleccionados:', event.target.files);
+      console.log("Archivos seleccionados:", event.target.files);
       const newFiles = Array.from(event.target.files);
       setSelectedFiles((prev) => [...prev, ...newFiles]);
 
-      const message = newFiles.length > 1 ? `${newFiles.length} fotos agregadas correctamente.` : `${newFiles.length} foto agregada correctamente.`;
+      const message =
+        newFiles.length > 1
+          ? `${newFiles.length} fotos agregadas correctamente.`
+          : `${newFiles.length} foto agregada correctamente.`;
       showAlert("success", "Fotos agregadas", message);
     }
   };
@@ -81,14 +103,13 @@ const PublishObject = () => {
     fileInputRef.current?.click();
   };
 
-
   // submit del formulario
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({}); // Limpiar errores previos
 
     if (!session) {
-      console.warn('No hay sesión activa.');
+      console.warn("No hay sesión activa.");
       return;
     }
 
@@ -96,22 +117,29 @@ const PublishObject = () => {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    const categoryId = formData.get('category');
+    const categoryId = formData.get("category");
+    const locationAreaId = formData.get("locationArea");
 
     const data: PostPayload = {
-      title: String(formData.get('title') || ''),
-      description: String(formData.get('description') || ''),
+      title: String(formData.get("title") || ""),
+      description: String(formData.get("description") || ""),
       product_category_id: categoryId ? Number(categoryId) : undefined,
-      foundWhere: String(formData.get('foundWhere') || '') || undefined,
-      dateFound: String(formData.get('dateFound') || '') || null,
+      foundWhere: String(formData.get("foundWhere") || "") || undefined,
+      location_area_id: locationAreaId ? Number(locationAreaId) : undefined,
+      dateFound: String(formData.get("dateFound") || "") || null,
     };
 
     // Validaciones
     const newErrors: Record<string, string> = {};
     if (!data.title) newErrors.title = "El título es obligatorio.";
-    if (!data.description) newErrors.description = "La descripción es obligatoria.";
-    if (!data.product_category_id) newErrors.category = "La categoría es obligatoria.";
-    if (!data.foundWhere) newErrors.foundWhere = "El lugar donde lo encontraste es obligatorio.";
+    if (!data.description)
+      newErrors.description = "La descripción es obligatoria.";
+    if (!data.product_category_id)
+      newErrors.category = "La categoría es obligatoria.";
+    if (!data.foundWhere)
+      newErrors.foundWhere = "El lugar donde lo encontraste es obligatorio.";
+    if (!data.location_area_id)
+      newErrors.locationArea = "El edificio es obligatorio.";
     if (!data.dateFound) {
       newErrors.dateFound = "La fecha es obligatoria.";
     } else {
@@ -129,26 +157,32 @@ const PublishObject = () => {
       return;
     }
 
-
-    console.log('Publicar objeto - userId:', userId);
-    console.log('Datos del formulario:', data);
-    console.log('Archivos seleccionados:', selectedFiles);
+    console.log("Publicar objeto - userId:", userId);
+    console.log("Datos del formulario:", data);
+    console.log("Archivos seleccionados:", selectedFiles);
 
     setIsSubmitting(true);
     try {
       // subir la primera imagen (si existe) y crear el post
       const fileToUpload = selectedFiles[0];
       const created = await uploadPostWithImage(userId, data, fileToUpload);
-      console.log('Post creado:', created);
+      console.log("Post creado:", created);
 
       // limpiar estado y formulario
       setSelectedFiles([]);
       form.reset();
-      showAlert("success", "¡Éxito!", "Tu objeto ha sido publicado correctamente.");
-      
+      showAlert(
+        "success",
+        "¡Éxito!",
+        "Tu objeto ha sido publicado correctamente.",
+      );
     } catch (error) {
-      console.error('Error creando post:', error);
-      showAlert("error", "Error", "Hubo un problema al publicar tu objeto. Por favor, intenta de nuevo.");
+      console.error("Error creando post:", error);
+      showAlert(
+        "error",
+        "Error",
+        "Hubo un problema al publicar tu objeto. Por favor, intenta de nuevo.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -158,7 +192,7 @@ const PublishObject = () => {
   const handleClearFiles = () => {
     setSelectedFiles([]);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -258,7 +292,10 @@ const PublishObject = () => {
                 {/* ... (resto de los FormControl no cambian) ... */}
                 <FormControl isRequired isInvalid={!!errors.category}>
                   <FormLabel fontWeight="600">Categoría</FormLabel>
-                  <Select name="category" placeholder="Selecciona una categoría">
+                  <Select
+                    name="category"
+                    placeholder="Selecciona una categoría"
+                  >
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}
@@ -267,13 +304,32 @@ const PublishObject = () => {
                   </Select>
                 </FormControl>
                 <FormControl isRequired isInvalid={!!errors.foundWhere}>
-                  <FormLabel fontWeight="600">¿Dónde lo encontraste?</FormLabel>
+                  <FormLabel fontWeight="600">
+                    Detalla en lugar donde lo encontraste
+                  </FormLabel>
                   <Input
                     name="foundWhere"
-                    placeholder="Ej. CUCEI, Edificio G, Aula 205"
+                    placeholder="Ej. CUCEI, Banca Roja, Aula 205"
                   />
                   {errors.foundWhere && (
                     <FormErrorMessage>{errors.foundWhere}</FormErrorMessage>
+                  )}
+                </FormControl>
+
+                <FormControl isRequired isInvalid={!!errors.locationArea}>
+                  <FormLabel fontWeight="600">Edificio / Área</FormLabel>
+                  <Select
+                    name="locationArea"
+                    placeholder="Selecciona el edificio"
+                  >
+                    {locationAreas.map((area) => (
+                      <option key={area.id} value={area.id}>
+                        {area.location}
+                      </option>
+                    ))}
+                  </Select>
+                  {errors.locationArea && (
+                    <FormErrorMessage>{errors.locationArea}</FormErrorMessage>
                   )}
                 </FormControl>
 
@@ -355,7 +411,7 @@ const PublishObject = () => {
                           h="28px"
                           onClick={() => {
                             handleRemoveFile(index);
-                            if(selectedFiles.length === 1) {
+                            if (selectedFiles.length === 1) {
                               handleClearFiles();
                             }
                           }}
@@ -427,7 +483,9 @@ const PublishObject = () => {
                 <AlertIcon />
                 <Box>
                   <AlertTitle>{alertMessage.title}</AlertTitle>
-                  <AlertDescription>{alertMessage.description}</AlertDescription>
+                  <AlertDescription>
+                    {alertMessage.description}
+                  </AlertDescription>
                 </Box>
               </Alert>
             )}
@@ -463,7 +521,6 @@ const PublishObject = () => {
                 PUBLICAR OBJETO
               </Button>
             </HStack>
-
           </VStack>
         </form>
       </Box>

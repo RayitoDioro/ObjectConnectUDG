@@ -232,6 +232,7 @@ export default function LostObjects() {
                       title={post.title}
                       date={post.date}
                       location={post.location}
+                      locationAreaName={post.locationAreaName}
                     />
                   </Box>
                 ))}
