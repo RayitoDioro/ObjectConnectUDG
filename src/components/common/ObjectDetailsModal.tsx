@@ -4,6 +4,9 @@ import {
   Image, Text, VStack, HStack, Flex, Avatar, Heading, Center, Box 
 } from "@chakra-ui/react";
 import { type CardProps } from "@/types";
+import { useState, useEffect } from "react";
+import { supabaseClient } from "@/supabaseClient";
+import { VerifiedBadge } from "./VerifiedBadge";
 
 // Exportamos el tipo aquí para que Home, LostObjects, etc., puedan importarlo
 export type ExtendedCardProps = CardProps & {
@@ -31,6 +34,33 @@ const ObjectDetailsModal = ({
   currentUserId, 
   onStartChat 
 }: ObjectDetailsModalProps) => {
+
+  // Estado para verificar si el usuario está verificado o no
+  const [isVerified, setIsVerified] = useState(false);
+
+  useEffect(() => {
+    if(selectedObj?.authorId && isOpen){
+      checkVerification();
+    }
+  }, [selectedObj?.authorId, isOpen]);
+
+  const checkVerification = async () => {
+    try {
+      const { data, error } = await supabaseClient
+      .from('user_profile')
+      .select('verified_domain')
+      .eq('user_id', selectedObj?.authorId)
+      .single();
+
+      console.log(data);
+
+      if(error) throw error;
+      setIsVerified(data?.verified_domain || false);
+    } catch (error) {
+      console.error('Error checking verification:', error);
+      setIsVerified(false);
+    }
+  };
   
   // Si no hay objeto seleccionado, no renderizamos nada
   if (!selectedObj) return null;
@@ -47,7 +77,12 @@ const ObjectDetailsModal = ({
             <Flex justify="space-between" align="center" borderBottom="1px solid #eee" pb={3}>
               <HStack spacing={3}>
                 <Avatar size="sm" src={selectedObj.authorAvatarUrl} name={selectedObj.authorName} />
-                <Text fontWeight="bold" fontSize="md" color="gray.800">{selectedObj.authorName}</Text>
+                <VStack align="start" spacing={0}>
+                  <HStack spacing={2}>
+                    <Text fontWeight="bold" fontSize="md" color="gray.800">{selectedObj.authorName}</Text>
+                    <VerifiedBadge isVerified={isVerified} />
+                  </HStack>
+                </VStack>
               </HStack>
               <VStack align="end" spacing={0}>
                 <Text fontSize="xs" color="gray.500">{selectedObj.date}</Text>
