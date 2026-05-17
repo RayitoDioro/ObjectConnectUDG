@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Box, Flex, Heading, Image, Input, Button, Text, VStack, useToast, List, ListItem, ListIcon, Collapse } from '@chakra-ui/react';
-import { CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
+import { Box, Flex, Heading, Image, Input, Button, Text, VStack, useToast, Collapse } from '@chakra-ui/react';
 import udgLogo from '@/assets/leonUDG.png';
 import googleLogo from '@/assets/google_logo.svg';
 import { useNavigate } from "react-router-dom";
 import { supabaseClient } from "@/supabaseClient";
+import { validatePassword } from "@/utils/passwordValidation";
+import { translateAuthError } from "@/utils/authErrors";
+import { PasswordRequirementsDisplay } from "@/components/common/PasswordRequirements";
 
 const Login = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -15,15 +17,10 @@ const Login = () => {
     const [lastName, setLastName] = useState('');
     const [password, setPassword] = useState('');
     const [showPasswordReqs, setShowPasswordReqs] = useState(false);
+    const [isResettingPassword, setIsResettingPassword] = useState(false); //
 
     // Validar requisitos de contraseña
-    const passwordRequirements = {
-        minLength: password.length >= 6,
-        hasLowercase: /[a-z]/.test(password),
-        hasUppercase: /[A-Z]/.test(password),
-        hasNumber: /[0-9]/.test(password),
-        hasSpecial: /[!@#$%^&*()_+\-=[\]{}:<>?.,/~]/.test(password)
-    };
+    const passwordRequirements = validatePassword(password);
 
     const toggleForm = () => {
         setIsLogin(!isLogin);
@@ -38,6 +35,12 @@ const Login = () => {
         setLoading(true);
 
         try {
+            // Si estamos en modo reset, solo enviar email
+            if (isResettingPassword) {
+                await handlePasswordReset();
+                return;
+            }
+            
             if(isLogin){
                 // Lógica para iniciar sesión
                 const {error} = await supabaseClient.auth.signInWithPassword({email, password});
@@ -88,6 +91,8 @@ const Login = () => {
                         duration: 5000,
                         isClosable: true
                     });
+
+                    setIsLogin(true);
                 }
             }
 
@@ -114,42 +119,28 @@ const Login = () => {
         }
     };
 
-    // Función para traducir errores de Supabase al español
-    const translateAuthError = (errorMessage: string): string => {
-        // Errores de contraseña
-        if (errorMessage.includes('Password should be at least') || errorMessage.includes('password'))
-            return 'La contraseña debe cumplir los siguientes requisitos: mínimo 6 caracteres, incluir mayúsculas, minúsculas, números y caracteres especiales (!@#$%^&*).';
-        else if (errorMessage.includes('Password should contain'))
-            return 'La contraseña sigue sin cumplir con todos los requisitos de seguridad. Revisa los indicadores.';
+    // Lógica para recuperación de contraseña
+    const handlePasswordReset = async () => {
+        try {
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/reset-password`
+            });
 
-        // Error de email ya registrado
-        if (errorMessage.includes('already registered') || errorMessage.includes('User already registered')) {
-            return 'Este correo electrónico ya está registrado. Intenta iniciar sesión o recuperar tu contraseña.';
+            if (error) throw error;
+
+            toast({
+                title: 'Correo enviado',
+                description: 'Revisa tu bandeja de entrada para restablecer tu contraseña.',
+                status: 'success',
+                duration: 7000,
+                isClosable: true
+            });
+            
+            setIsResettingPassword(false); // Volver a login normal
+        } catch (error: unknown) {
+            showAuthError(error);
         }
-
-        // Error de email inválido
-        if (errorMessage.includes('Invalid email') || errorMessage.includes('invalid email')) {
-            return 'El correo electrónico no es válido. Verifica que esté escrito correctamente.';
-        }
-
-        // Error de credenciales incorrectas
-        if (errorMessage.includes('Invalid login credentials') || errorMessage.includes('Invalid credentials')) {
-            return 'Correo o contraseña incorrectos. Verifica tus datos e intenta nuevamente.';
-        }
-
-        // Error de email no confirmado
-        if (errorMessage.includes('Email not confirmed')) {
-            return 'Debes confirmar tu correo electrónico. Revisa tu bandeja de entrada y spam.';
-        }
-
-        // Error de rate limit
-        if (errorMessage.includes('rate limit') || errorMessage.includes('too many requests')) {
-            return 'Demasiados intentos. Por favor, espera una hora antes de intentar nuevamente.';
-        }
-
-        // Si no coincide con ningún patrón, devolver mensaje genérico
-        return 'Ocurrió un error inesperado. Por favor, verifica tus datos e intenta nuevamente.';
-    };
+    };    
 
     // Mensaje de error mejorado
     const showAuthError = (error: unknown) => {
@@ -200,68 +191,51 @@ const Login = () => {
                                 </>
                             )}
 
-                            <Input 
-                                type='password' 
-                                placeholder="Contraseña" 
-                                size='lg' 
-                                required 
-                                onChange={(e) => setPassword(e.target.value)}
-                                onFocus={() => !isLogin && setShowPasswordReqs(true)}
-                                onBlur={() => setShowPasswordReqs(false)}
-                            />
+                            {/* Solo muestra password si no estamos en modo reset */}
+                            {!isResettingPassword && (
+                                <Input 
+                                    type='password' 
+                                    placeholder="Contraseña" 
+                                    size='lg' 
+                                    required 
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    onFocus={() => !isLogin && setShowPasswordReqs(true)}
+                                    onBlur={() => setShowPasswordReqs(false)}
+                                />
+                            )}
+
+                            {/* Botón de recuperación de contraseña */}
+                            {isLogin && !isResettingPassword && (
+                                <Button
+                                    variant='unstyled'
+                                    color='brand.blue'
+                                    size='sm'
+                                    onClick={() => setIsResettingPassword(true)}
+                                    alignSelf='flex-end'
+                                    mt='-2'
+                                >
+                                    ¿Olvidaste tu contraseña?
+                                </Button>
+                            )}
+
+                            {/* Botón cancelar en modo reset */}
+                            {isResettingPassword && (
+                                <Button
+                                    variant='unstyled'
+                                    color='brand.blue'
+                                    size='sm'
+                                    onClick={() => setIsResettingPassword(false)}
+                                    alignSelf='flex-end'
+                                    mt='-2'
+                                >
+                                    Volver al inicio de sesión
+                                </Button>
+                            )}
 
                             {/* Indicadores de requisitos de contraseña - solo en registro */}
-                            {!isLogin && (
+                            {!isLogin && !isResettingPassword && (
                                 <Collapse in={showPasswordReqs || password.length > 0} animateOpacity>
-                                    <Box 
-                                        w='100%' 
-                                        bg='gray.50' 
-                                        p='4' 
-                                        borderRadius='md' 
-                                        border='1px solid' 
-                                        borderColor='gray.200'
-                                    >
-                                        <Text fontSize='xs' fontWeight='bold' color='gray.600' mb='2'>
-                                            Requisitos de contraseña:
-                                        </Text>
-                                        <List spacing='1' fontSize='xs'>
-                                            <ListItem color={passwordRequirements.minLength ? 'green.600' : 'gray.500'}>
-                                                <ListIcon 
-                                                    as={passwordRequirements.minLength ? CheckCircleIcon : WarningIcon} 
-                                                    color={passwordRequirements.minLength ? 'green.500' : 'gray.400'}
-                                                />
-                                                Mínimo 6 caracteres
-                                            </ListItem>
-                                            <ListItem color={passwordRequirements.hasLowercase ? 'green.600' : 'gray.500'}>
-                                                <ListIcon 
-                                                    as={passwordRequirements.hasLowercase ? CheckCircleIcon : WarningIcon} 
-                                                    color={passwordRequirements.hasLowercase ? 'green.500' : 'gray.400'}
-                                                />
-                                                Al menos una letra minúscula (a-z)
-                                            </ListItem>
-                                            <ListItem color={passwordRequirements.hasUppercase ? 'green.600' : 'gray.500'}>
-                                                <ListIcon 
-                                                    as={passwordRequirements.hasUppercase ? CheckCircleIcon : WarningIcon} 
-                                                    color={passwordRequirements.hasUppercase ? 'green.500' : 'gray.400'}
-                                                />
-                                                Al menos una letra MAYÚSCULA (A-Z)
-                                            </ListItem>
-                                            <ListItem color={passwordRequirements.hasNumber ? 'green.600' : 'gray.500'}>
-                                                <ListIcon 
-                                                    as={passwordRequirements.hasNumber ? CheckCircleIcon : WarningIcon} 
-                                                    color={passwordRequirements.hasNumber ? 'green.500' : 'gray.400'}
-                                                />
-                                                Al menos un número (0-9)
-                                            </ListItem>
-                                            <ListItem color={passwordRequirements.hasSpecial ? 'green.600' : 'gray.500'}>
-                                                <ListIcon 
-                                                    as={passwordRequirements.hasSpecial ? CheckCircleIcon : WarningIcon} 
-                                                    color={passwordRequirements.hasSpecial ? 'green.500' : 'gray.400'}
-                                                />
-                                                Al menos un carácter especial (!@#$%^&*)
-                                            </ListItem>
-                                        </List>
-                                    </Box>
+                                    <PasswordRequirementsDisplay requirements={passwordRequirements} />
                                 </Collapse>
                             )}
 
@@ -274,25 +248,32 @@ const Login = () => {
                                 size='lg'
                                 _hover={{ bg: 'brand.blueLight'}}
                                 isLoading={loading}
-                                loadingText={isLogin ? 'Iniciando' : 'Registrando...'}
+                                loadingText={
+                                    isResettingPassword
+                                    ? 'Enviando...'
+                                    : (isLogin ? 'Iniciando' : 'Registrando...')}
                             >
-                                {isLogin ? 'Iniciar sesión' : 'Registrarme'}
+                                {isResettingPassword
+                                ? 'Enviar enlace de recuperación'
+                                : isLogin ? 'Iniciar sesión' : 'Registrarme'}
                             </Button>   
                         </VStack>
                         
                         {/* Botón para inicio de sesión o registro por google */}
-                        <Button
-                            w='100%'
-                            variant='outline'
-                            mt='4'
-                            size='lg'
-                            leftIcon={<Image src={googleLogo} alt='Google' boxSize='20px' />}
-                            _hover={{ bg: 'gray.200'}}
-                            onClick={handleGoogleLogin}
-                            isLoading={loading}
-                        >
-                            {isLogin ? 'Iniciar con Google' : 'Registrase con Google'}
-                        </Button>
+                        {!isResettingPassword && (
+                            <Button
+                                w='100%'
+                                variant='outline'
+                                mt='4'
+                                size='lg'
+                                leftIcon={<Image src={googleLogo} alt='Google' boxSize='20px' />}
+                                _hover={{ bg: 'gray.200'}}
+                                onClick={handleGoogleLogin}
+                                isLoading={loading}
+                            >
+                                {isLogin ? 'Iniciar con Google' : 'Registrase con Google'}
+                            </Button>
+                        )}
 
                         {/* toggleText y Link */}
                         <Text textAlign='center' fontSize='sm' color='gray.600' mt='6' >

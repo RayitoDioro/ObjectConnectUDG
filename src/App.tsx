@@ -21,6 +21,7 @@ import { PermissionsTable } from './components/pages/admin/permissions/Permissio
 import { CategoriesTable } from './components/pages/admin/categories/CategoriesTable.tsx';
 import { RolePermissionsTable } from './components/pages/admin/rolePermissions/RolePermissionsTable.tsx';
 import MetricasML from "./pages/admin/MetricasML.tsx";
+import ResetPassword from "./components/pages/reset-password/ResetPassword.tsx";
 
 function App() {
   // Elimina el useAuth aquí, solo usa el Provider
@@ -187,6 +188,7 @@ function App() {
             }
           />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
