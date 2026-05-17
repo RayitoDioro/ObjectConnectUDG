@@ -48,7 +48,7 @@ const Login = () => {
                 navigate('/');
             } else {
                 // Lógica para el registro
-                const {error} =  await supabaseClient.auth.signUp({
+                const {data, error} =  await supabaseClient.auth.signUp({
                     email, 
                     password,
                     options: {
@@ -63,14 +63,32 @@ const Login = () => {
                     throw error;
                 }
 
-                // Cuadro de diálogo que envía mensaje de éxito al usuario
-                toast({
-                    title: 'Cuenta creada con éxito.',
-                    description: 'Revisa tu bandeja de entrada para verificar tu cuenta.',
-                    status: 'success',
-                    'duration': 5000,
-                    isClosable: true
-                });
+                // verificación de envío de correo
+                const userCreated = data.user;
+                const emailVerified = data.user?.user_metadata.email_verified;
+
+                // Usuario ya confirmado - se intentó registrar con un correo ya confirmado
+                if(userCreated && emailVerified === undefined){
+                    toast({
+                        title: 'Cuenta ya confirmada.',
+                        description: 'Ya puedes iniciar sesión con tu correo y contraseña.',
+                        status: 'info',
+                        duration: 5000,
+                        isClosable: true
+                    });
+                    
+                    setIsLogin(true);
+                }
+                // Usuario necesita confirmar correo - nuevo usuario o se intentó registrar uno ya registrado
+                else if(userCreated && emailVerified === false){
+                    toast({
+                        title: 'Revisa tu correo electrónico.',
+                        description: 'Te hemos enviado un enlace de verificación. Si ya te habías registrado, se enviará un nuevo enlace.',
+                        status: 'success',
+                        duration: 5000,
+                        isClosable: true
+                    });
+                }
             }
 
         } catch(error: unknown) {
@@ -102,7 +120,7 @@ const Login = () => {
         if (errorMessage.includes('Password should be at least') || errorMessage.includes('password'))
             return 'La contraseña debe cumplir los siguientes requisitos: mínimo 6 caracteres, incluir mayúsculas, minúsculas, números y caracteres especiales (!@#$%^&*).';
         else if (errorMessage.includes('Password should contain'))
-            return 'La contraseña no cumple con los requisitos de seguridad. Revisa los indicadores arriba.';
+            return 'La contraseña sigue sin cumplir con todos los requisitos de seguridad. Revisa los indicadores.';
 
         // Error de email ya registrado
         if (errorMessage.includes('already registered') || errorMessage.includes('User already registered')) {
@@ -177,8 +195,8 @@ const Login = () => {
                             
                             {!isLogin && (
                                 <>
-                                    <Input type='text' placeholder="Nombre" size='lg' onChange={(e) => setFirstName(e.target.value)} />
-                                    <Input type='text' placeholder="Apellido" size='lg' onChange={(e) => setLastName(e.target.value)} />
+                                    <Input type='text' placeholder="Nombre" size='lg' required onChange={(e) => setFirstName(e.target.value)} />
+                                    <Input type='text' placeholder="Apellido" size='lg' required onChange={(e) => setLastName(e.target.value)} />
                                 </>
                             )}
 
