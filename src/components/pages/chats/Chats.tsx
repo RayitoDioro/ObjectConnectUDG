@@ -272,7 +272,8 @@ const Chats = () => {
         w={showSidebar ? (isMobile ? "100%" : "350px") : "0px"}
         borderRight={showSidebar ? "1px" : "none"}
         borderColor="gray.200" 
-        overflowY="auto" 
+        overflowY="auto"
+        overflow="hidden"
         transition="all 0.3s ease"
         position={isMobile ? "absolute" : "relative"}
         h="full"
@@ -285,11 +286,13 @@ const Chats = () => {
           align="stretch"
           h="full"
           display={showSidebar ? "flex" : isMobile ? "none" : "flex"}
+          opacity={showSidebar ? 1 : 0}
+          transition="opacity 0.1s ease"
         >
           <HStack justify="space-between" p={3} pb={2} flexShrink={0}>
             <Heading size="md">Tus Conversaciones</Heading>
             {/* BOTÓN TOGGLER EN MÓVIL (ocultar sidebar) */}
-            {isMobile && selectedThread && (
+            {isMobile && (
               <IconButton
                 aria-label="Ver chat actual"
                 icon={<ChevronLeftIcon />}
