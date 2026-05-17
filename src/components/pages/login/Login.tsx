@@ -171,13 +171,13 @@ const Login = () => {
 
     return (
         <Flex
-            align='center'
             justify='center'
             minH='100vh'
             bg='brand.blue'
+            overflow='auto'
         >
             {/* container - elemento que contiene todo y se ajusta en base a wrapper */}
-            <Box w='100%' maxW='420px' p='4'>
+            <Box w='100%' maxW='420px' p='4' my='auto'>
                 {/* Card */}
                 <Box bg='white' borderRadius='20px' boxShadow='xl' p={{ base: 6, md: 8 }}>
                     {/* CardHeader */}
