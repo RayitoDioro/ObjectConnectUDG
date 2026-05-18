@@ -7,6 +7,7 @@ import { supabaseClient } from "@/supabaseClient";
 import { validatePassword } from "@/utils/passwordValidation";
 import { translateAuthError } from "@/utils/authErrors";
 import { PasswordRequirementsDisplay } from "@/components/common/PasswordRequirements";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 
 const Login = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -195,6 +196,18 @@ const Login = () => {
         >
             {/* container - elemento que contiene todo y se ajusta en base a wrapper */}
             <Box w='100%' maxW='420px' p='4' my='auto'>
+                {/* Botón volver */}
+                <Button
+                    leftIcon={<ArrowBackIcon />}
+                    variant='unstyled'
+                    color='white'
+                    _hover={{ color: 'whiteAlpha.300' }}
+                    onClick={() => navigate('/')}
+                    mb='4'
+                    size='sm'
+                >
+                    Volver al inicio
+                </Button>
                 {/* Card */}
                 <Box bg='white' borderRadius='20px' boxShadow='xl' p={{ base: 6, md: 8 }}>
                     {/* CardHeader */}
@@ -239,6 +252,7 @@ const Login = () => {
                                     variant='unstyled'
                                     color='brand.blue'
                                     size='sm'
+                                    _hover={{ color: 'brand.blueLight' }}
                                     onClick={() => setIsResettingPassword(true)}
                                     alignSelf='flex-end'
                                     mt='-2'
@@ -253,6 +267,7 @@ const Login = () => {
                                     variant='unstyled'
                                     color='brand.blue'
                                     size='sm'
+                                    _hover={{ color: 'brand.blueLight' }}
                                     onClick={() => setIsResettingPassword(false)}
                                     alignSelf='flex-end'
                                     mt='-2'
@@ -312,6 +327,7 @@ const Login = () => {
                                     variant='link'
                                     color='brand.blue'
                                     fontWeight='bold'
+                                    _hover={{ color: 'brand.blueLight' }}
                                     onClick={toggleForm}
                                 >
                                     {isLogin ? 'Crear cuenta' : 'Iniciar sesión'}
