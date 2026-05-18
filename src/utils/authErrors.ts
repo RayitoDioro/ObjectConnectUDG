@@ -1,4 +1,8 @@
 export const translateAuthError = (errorMessage: string): string => {
+    // Error de contraseña repetida (debe ir primero antes del caso genérico XD)
+    if (errorMessage.includes('should be different') || errorMessage.includes('same password') || errorMessage.includes('New password should be different'))
+        return 'La nueva contraseña debe ser diferente a la anterior. Por favor, elige una contraseña distinta.';
+    
     // Errores de contraseña
     if (errorMessage.includes('Password should be at least') || errorMessage.includes('password'))
         return 'La contraseña debe cumplir los siguientes requisitos: mínimo 6 caracteres, incluir mayúsculas, minúsculas, números y caracteres especiales (!@#$%^&*).';

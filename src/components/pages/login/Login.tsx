@@ -174,8 +174,11 @@ const Login = () => {
                     {/* CardHeader */}
                     <VStack spacing='4'>
                         <Image src={udgLogo} alt="Logo UDG León" boxSize='100px' />
-                        <Heading as='h2' size='lg' color='brand.blue'>
-                            {isLogin ? 'Iniciar sesión' : 'Crear cuenta'}
+                        <Heading as='h2' size='lg' color='brand.blue' textAlign='center'>
+                            {
+                                isResettingPassword ? 'Restablecer contraseña' :
+                                isLogin ? 'Iniciar sesión' : 'Crear cuenta'
+                            }
                         </Heading>
                     </VStack>
 
@@ -276,17 +279,19 @@ const Login = () => {
                         )}
 
                         {/* toggleText y Link */}
-                        <Text textAlign='center' fontSize='sm' color='gray.600' mt='6' >
-                            {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
-                            <Button
-                                variant='link'
-                                color='brand.blue'
-                                fontWeight='bold'
-                                onClick={toggleForm}
-                            >
-                                {isLogin ? 'Crear cuenta' : 'Iniciar sesión'}
-                            </Button>
-                        </Text>
+                        {!isResettingPassword && (
+                            <Text textAlign='center' fontSize='sm' color='gray.600' mt='6' >
+                                {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
+                                <Button
+                                    variant='link'
+                                    color='brand.blue'
+                                    fontWeight='bold'
+                                    onClick={toggleForm}
+                                >
+                                    {isLogin ? 'Crear cuenta' : 'Iniciar sesión'}
+                                </Button>
+                            </Text>
+                        )}
                     </Box>
                 </Box>
             </Box>
