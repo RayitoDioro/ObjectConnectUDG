@@ -40,7 +40,7 @@ const Login = () => {
                 await handlePasswordReset();
                 return;
             }
-            
+
             if(isLogin){
                 // Lógica para iniciar sesión
                 const {error} = await supabaseClient.auth.signInWithPassword({email, password});
@@ -166,6 +166,32 @@ const Login = () => {
             minH='100vh'
             bg='brand.blue'
             overflow='auto'
+            sx={{
+                '&::-webkit-scrollbar': {
+                    width: '8px',
+                },
+                '&::-webkit-scrollbar-track': {
+                    backgroundColor: 'transparent',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.01)',
+                    borderRadius: '4px',
+                },
+                // desktop: mostrar solo al hacer hover sobre la scrollbar
+                '@media (hover: hover) and (pointer: fine)': {
+                    '&::-webkit-scrollbar-thumb:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                    },
+                },
+                // mobile: ocultar completamente
+                '@media (hover: none) and (pointer: coarse)': {
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    '&::-webkit-scrollbar': {
+                        display: 'none',
+                    },
+                },
+            }}
         >
             {/* container - elemento que contiene todo y se ajusta en base a wrapper */}
             <Box w='100%' maxW='420px' p='4' my='auto'>
