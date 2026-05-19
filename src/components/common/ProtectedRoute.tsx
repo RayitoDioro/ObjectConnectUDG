@@ -20,10 +20,11 @@ export const ProtectedRoute = ({
   const { session, loading: authLoading } = useAuth();
   const { hasAllPermissions, hasAnyPermission, loading: permLoading } = usePermissions();
 
+  // Mientras carga: mostrar spinner centrado
   if (authLoading || permLoading) {
     return (
-      <Center h="100vh">
-        <Spinner size="xl" color="#00569c" />
+      <Center py={20}>
+        <Spinner size="xl" color="#00569c" thickness="4px" />
       </Center>
     );
   }
@@ -42,9 +43,9 @@ export const ProtectedRoute = ({
       : hasAnyPermission(permsToCheck);
 
     if (!hasAccess) {
-      return <Navigate to="/dashboard" replace />;
+      return <Navigate to="/" replace />;
     }
   }
-
+                
   return <>{children}</>;
 };

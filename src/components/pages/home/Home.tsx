@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Center, Spinner, useDisclosure } from "@chakra-ui/react";
+import { Box, Center, Spinner, useDisclosure, useToast } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom"; 
 
 import PresentationSection from './subComponents/PresentationSection';
@@ -21,6 +21,7 @@ export type CategoryDB = {
 
 const Home = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [dbObjects, setDbObjects] = useState<ExtendedCardProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -129,6 +130,21 @@ const Home = () => {
 
   // MAGIA APLICADA: Ahora creamos el hilo con Supabase antes de navegar
   const handleStartChat = async (authorId: string) => {
+    if (!currentUserId) {
+      toast({
+        title: 'Inicia sesión',
+        description: 'Debes iniciar sesión para poder enviar mensajes.',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+    
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
+      return;
+    }
+
     if (!selectedObj || !currentUserId) return;
     
     // selectedObj.id es el postId
@@ -165,12 +181,18 @@ const Home = () => {
         categoriesList={dbCategories} 
       />
 
-      <ObjectGrid
-        lostItems={lostItems}
-        foundItems={foundItems}
-        searchObj={searchObj}
-        onCardClick={handleOpenModal as any} 
-      />
+      {loading ? (
+        <Center py={20}>
+          <Spinner size="xl" color="brand.blue" thickness="4px" />
+        </Center>
+      ) : (
+        <ObjectGrid
+          lostItems={lostItems}
+          foundItems={foundItems}
+          searchObj={searchObj}
+          onCardClick={handleOpenModal as any} 
+        />
+      )}
 
       <ObjectDetailsModal
         isOpen={isOpen}

@@ -41,11 +41,11 @@ function App() {
           <Route
             path="/objetos-perdidos"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <LostObjects />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route
@@ -60,51 +60,51 @@ function App() {
           <Route
             path="/publicar-objeto"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <PublishObject />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route
             path="/chats/:threadId?"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <Chats />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route
             path="/perfil"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <Profile />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route
             path="/perfil/:userId"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <Profile />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route
             path="/settings"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <ProfileSettings />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route

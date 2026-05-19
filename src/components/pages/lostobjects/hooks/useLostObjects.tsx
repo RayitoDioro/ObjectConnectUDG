@@ -17,9 +17,11 @@ export const useLostObjects = () => {
     const [filteredObjects, setFilteredObjects] = useState<FullCardProps[]>([]);
     const [isLoadingMatches, setIsLoadingMatches] = useState(false);
     const [searchError, setSearchError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchLostObjects = async () => {
+            setLoading(true);
             try {
                 const posts: Post[] = await getPosts(1); // 1 for "LOST"
 
@@ -62,8 +64,10 @@ export const useLostObjects = () => {
                     setLostObjects(mappedPosts);
                     setFilteredObjects(mappedPosts);
                 }
+                setLoading(false);
             } catch (error) {
                 console.error("Error fetching lost objects:", error);
+                setLoading(false);
             }
         };
 
@@ -207,6 +211,8 @@ export const useLostObjects = () => {
             },
 
             isLoadingMatches,
+
+            loading,
 
             searchError
 

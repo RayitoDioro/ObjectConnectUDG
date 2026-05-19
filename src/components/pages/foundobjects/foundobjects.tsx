@@ -182,13 +182,13 @@ const FoundObjects = () => {
     category: dbCategories.find(c => Number(c.id) === selectedObject.categoryId)?.name || "Otros",
   } as ExtendedCardProps : null;
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="60vh">
-        <Spinner size="xl" color="green.500" thickness="4px" />
-      </Box>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <Box display="flex" justifyContent="center" alignItems="center" height="60vh">
+  //       <Spinner size="xl" color="green.500" thickness="4px" />
+  //     </Box>
+  //   );
+  // }
 
   return (
     <Box bg="gray.50" minH="100vh" pb={12}>
@@ -299,7 +299,11 @@ const FoundObjects = () => {
           </Box>
 
           <Box w="100%">
-            {filteredObjects.length === 0 ? (
+            {loading ? (
+              <Center py={20} bg="white" borderRadius="xl" shadow="sm">
+                <Spinner size="xl" color="green.500" thickness="4px" />
+              </Center>
+            ) : filteredObjects.length === 0 ? (
               <Center py={20} bg="white" borderRadius="xl" shadow="sm">
                 <Text fontSize="xl" color="gray.500">
                   Aún no hay objetos marcados como encontrados o que coincidan con tu búsqueda.
