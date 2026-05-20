@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Flex, VStack, Text, Input, Avatar, Heading, Spinner, IconButton, HStack, Spacer } from '@chakra-ui/react';
+import { Box, Flex, VStack, Text, Input, Avatar, Heading, Spinner, IconButton, HStack, useMediaQuery } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabaseClient } from '@/supabaseClient';
-import { ArrowUpIcon, DeleteIcon } from '@chakra-ui/icons'; // <-- Importamos el DeleteIcon
+import { ArrowUpIcon, DeleteIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons'; // <-- Importamos el DeleteIcon
+import { VerifiedBadge } from '@/components/common/VerifiedBadge'; 
 
 // --- Tipos de Datos ---
 type ThreadInfo = {
@@ -39,6 +40,38 @@ const Chats = () => {
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Estado para toggle de la barra izquierda
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [isMobile] = useMediaQuery("(max-width: 768px)");
+
+
+  // estado para rastrear verificaciones de usuarios
+  const [verifiedUsers, setVerifiedUsers] = useState<Record<string, boolean>>({});
+
+  const checkUserVerification = async (userId: string) => {
+    if (verifiedUsers[userId] !== undefined) return; // está en caché
+
+    try {
+      const { data, error } = await supabaseClient
+        .from('user_profile')
+        .select('verified_domain')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) throw error;
+      setVerifiedUsers(prev => ({
+        ...prev,
+        [userId]: data?.verified_domain || false
+      }));
+    } catch (error) {
+      console.error('Error checking verification:', error);
+      setVerifiedUsers(prev => ({
+        ...prev,
+        [userId]: false
+      }));
+    }
+  };
+
   // Efecto para cargar la lista de conversaciones
   useEffect(() => {
     const fetchUserThreads = async () => {
@@ -63,6 +96,9 @@ const Chats = () => {
           const enrichedThreads: ThreadInfo[] = fetchedThreads.map((thread: any) => {
             const threadExtra = threadsPosts?.find(tp => tp.id === thread.thread_id);
             const postTitle = threadExtra?.posts?.title || 'Publicación desconocida';
+
+            // verifica cada usuario
+            checkUserVerification(thread.other_participant_id);
             
             return {
               ...thread,
@@ -232,74 +268,184 @@ const Chats = () => {
     <Flex h="calc(100vh - 160px)" bg="gray.50">
       
       {/* PANEL IZQUIERDO: Lista de Conversaciones */}
-      <VStack w="350px" borderRight="1px" borderColor="gray.200" p={2} spacing={2} overflowY="auto" align="stretch">
-        <Heading size="md" p={3}>Tus Conversaciones</Heading>
-        {threads.length === 0 ? (
-          <Text color="gray.500" p={3}>No tienes conversaciones aún.</Text>
-        ) : (
-          threads.map((thread) => (
-            <Flex
-              key={thread.thread_id}
-              p={3} w="full" borderRadius="md"
-              bg={selectedThread?.thread_id === thread.thread_id ? "#00569c" : "white"}
-              color={selectedThread?.thread_id === thread.thread_id ? "white" : "black"}
-              shadow="sm" cursor="pointer"
-              _hover={{ bg: selectedThread?.thread_id === thread.thread_id ? "#00569c" : "gray.100" }}
-              onClick={() => handleSelectThread(thread)}
-              align="center"
-            >
-              <Avatar size="md" name={`${thread.other_participant_first_name} ${thread.other_participant_last_name}`} src={thread.other_participant_photo_url || ''} />
-              
-              <VStack align="flex-start" ml={3} spacing={0} flex="1" overflow="hidden">
-                <Text fontWeight="bold" isTruncated w="full">
-                  {`${thread.other_participant_first_name} ${thread.other_participant_last_name}`}
-                </Text>
+      <Box 
+        w={showSidebar ? (isMobile ? "100%" : "350px") : "0px"}
+        borderRight={showSidebar ? "1px" : "none"}
+        borderColor="gray.200" 
+        overflowY="auto"
+        overflow="hidden"
+        transition="all 0.3s ease"
+        position={isMobile ? "absolute" : "relative"}
+        h="full"
+        bg="white"
+        zIndex={isMobile && showSidebar ? 20 : 1}
+        >
+          <VStack 
+          p={showSidebar ? 2 : 0}
+          spacing={2} 
+          align="stretch"
+          h="full"
+          display={showSidebar ? "flex" : isMobile ? "none" : "flex"}
+          opacity={showSidebar ? 1 : 0}
+          transition="opacity 0.1s ease"
+        >
+          <HStack justify="space-between" p={3} pb={2} flexShrink={0}>
+            <Heading size="md">Tus Conversaciones</Heading>
+            {/* BOTÓN TOGGLER EN MÓVIL (ocultar sidebar) */}
+            {isMobile && (
+              <IconButton
+                aria-label="Ver chat actual"
+                icon={<ChevronLeftIcon />}
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSidebar(false)}
+                flexShrink={0}
+              />
+            )}
+            {/* BOTÓN TOGGLER EN DESKTOP (ocultar sidebar) */}
+            {!isMobile && (
+              <IconButton
+                aria-label="Ocultar conversaciones"
+                icon={<ChevronLeftIcon />}
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSidebar(false)}
+                flexShrink={0}
+            />
+            )}
+        </HStack>
+        
+          {threads.length === 0 ? (
+            <Text color="gray.500" p={3}>No tienes conversaciones aún.</Text>
+          ) : (
+            threads.map((thread) => (
+              <Flex
+                key={thread.thread_id}
+                p={3} w="full" borderRadius="md"
+                bg={selectedThread?.thread_id === thread.thread_id ? "#00569c" : "white"}
+                color={selectedThread?.thread_id === thread.thread_id ? "white" : "black"}
+                shadow="sm" cursor="pointer"
+                _hover={{ bg: selectedThread?.thread_id === thread.thread_id ? "#00569c" : "gray.100" }}
+                onClick={() => {
+                  handleSelectThread(thread);
+                  if (isMobile) setShowSidebar(false);
+                }}
+                align="center"
+              >
+                <Avatar size="md" name={`${thread.other_participant_first_name} ${thread.other_participant_last_name}`} src={thread.other_participant_photo_url || ''} />
                 
-                <Text 
-                  fontSize="xs" 
-                  color={selectedThread?.thread_id === thread.thread_id ? "blue.100" : "blue.600"} 
-                  fontWeight="bold" 
-                  isTruncated w="full" mb={1}
-                >
-                  📦 {thread.post_title}
-                </Text>
+                <VStack align="flex-start" ml={3} spacing={0} flex="1" overflow="hidden">
+                  <HStack spacing={1} w="full" justify="space-between">
+                    <Text fontWeight="bold" isTruncated flex="1">
+                      {`${thread.other_participant_first_name} ${thread.other_participant_last_name}`}
+                    </Text>
+                    <VerifiedBadge 
+                      isVerified={verifiedUsers[thread.other_participant_id] || false}
+                      size="sm"
+                    />
+                  </HStack>
+                  
+                  <Text 
+                    fontSize="xs" 
+                    color={selectedThread?.thread_id === thread.thread_id ? "blue.100" : "blue.600"} 
+                    fontWeight="bold" 
+                    isTruncated w="full" mb={1}
+                  >
+                    📦 {thread.post_title}
+                  </Text>
 
-                <Text fontSize="sm" opacity={0.8} isTruncated w="full">
-                  {thread.last_message_content || "Sin mensajes..."}
-                </Text>
-              </VStack>
-            </Flex>
-          ))
-        )}
-      </VStack>
+                  <Text fontSize="sm" opacity={0.8} isTruncated w="full">
+                    {thread.last_message_content || "Sin mensajes..."}
+                  </Text>
+                </VStack>
+              </Flex>
+            ))
+          )}
+        </VStack>
+      </Box>
+
+      {/* OVERLAY EN MÓVIL */}
+      {isMobile && showSidebar && (
+        <Box
+          position="fixed"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          bg="blackAlpha.500"
+          zIndex={15}
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
 
       {/* PANEL DERECHO: Vista de Mensajes */}
-      <Flex direction="column" flex="1">
+      <Flex direction="column" flex="1" position="relative" minW={0}>
+        {/* BOTÓN TOGGLER cuando sidebar está oculto */}
+        {!showSidebar && (
+          <IconButton
+            aria-label="Mostrar conversaciones"
+            icon={<ChevronRightIcon />}
+            variant="ghost"
+            size="sm"
+            position="absolute"
+            top={2}
+            left={2}
+            zIndex={10}
+            onClick={() => setShowSidebar(true)}
+          />
+        )}
+        
         {selectedThread ? (
           <>
             {/* ENCABEZADO DEL CHAT ACTUAL */}
-            <HStack p={4} borderBottom="1px" borderColor="gray.200" bg="white" spacing={4}>
-              <Avatar size="sm" name={`${selectedThread.other_participant_first_name} ${selectedThread.other_participant_last_name}`} src={selectedThread.other_participant_photo_url || ''} />
-              <VStack align="flex-start" spacing={0}>
-                <Heading size="md">{`${selectedThread.other_participant_first_name} ${selectedThread.other_participant_last_name}`}</Heading>
-                
-                <Text fontSize="sm" color="gray.500" fontWeight="medium">
-                  Sobre: {selectedThread.post_title}
-                </Text>
-              </VStack>
+            <Box 
+              p={4}
+              pl={!showSidebar ? 12 : 4}
+              borderBottom="1px" 
+              borderColor="gray.200" 
+              bg="white" 
+              w="full"
+              position="relative"
+            >
+              {/* Fila 1: Verified Badge */}
+              <Box mb={2}>
+                <VerifiedBadge 
+                  isVerified={verifiedUsers[selectedThread.other_participant_id] || false}
+                  size="md"
+                />
+              </Box>
 
-              <Spacer /> {/* Empuja el botón hacia la derecha */}
 
-              {/* BOTÓN PARA ELIMINAR EL CHAT */}
-              <IconButton
-                aria-label="Eliminar chat"
-                icon={<DeleteIcon />}
-                colorScheme="red"
-                variant="ghost"
-                onClick={handleDeleteThread}
-                title="Eliminar esta conversación"
-              />
-            </HStack>
+              {/* Fila 2: Avatar + Info */}
+              <HStack spacing={3} align="flex-start" w="full">
+                <Avatar 
+                  size="sm" 
+                  name={`${selectedThread.other_participant_first_name} ${selectedThread.other_participant_last_name}`} 
+                  src={selectedThread.other_participant_photo_url || ''} 
+                  flexShrink={0}
+                />
+                <VStack align="flex-start" spacing={0} flex={1} minW={0}>
+                  <Heading size="md" noOfLines={1}>
+                    {`${selectedThread.other_participant_first_name} ${selectedThread.other_participant_last_name}`}
+                  </Heading>
+                  <Text fontSize="sm" color="gray.500" fontWeight="medium" noOfLines={2}>
+                    Sobre: {selectedThread.post_title}
+                  </Text>
+                </VStack>
+
+                {/* Botón eliminar en la esquina */}
+                <IconButton
+                  aria-label="Eliminar chat"
+                  icon={<DeleteIcon />}
+                  colorScheme="red"
+                  variant="ghost"
+                  onClick={handleDeleteThread}
+                  title="Eliminar esta conversación"
+                  size="sm"
+                  flexShrink={0}
+                />
+              </HStack>
+            </Box>
 
             {/* ZONA DE MENSAJES */}
             <Flex direction="column" flex="1" overflowY="auto" p={4}>
@@ -318,15 +464,16 @@ const Chats = () => {
             </Flex>
 
             {/* INPUT PARA ENVIAR */}
-            <Flex p={4} borderTop="1px" borderColor="gray.200" bg="white">
+            <Flex p={4} borderTop="1px" borderColor="gray.200" bg="white" gap={2}>
               <Input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Escribe un mensaje..."
-                mr={2}
                 onKeyPress={(e) => { if (e.key === 'Enter') handleSendMessage(); }}
                 borderRadius="20px"
                 bg="gray.100"
+                flex={1}
+                minW={0}
               />
               <IconButton
                 isRound
@@ -335,6 +482,7 @@ const Chats = () => {
                 icon={<ArrowUpIcon />}
                 onClick={handleSendMessage}
                 isDisabled={!newMessage.trim()}
+                flexShrink={0}
               />
             </Flex>
           </>

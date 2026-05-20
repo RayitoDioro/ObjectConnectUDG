@@ -17,11 +17,16 @@ export const useLostObjects = () => {
     const [filteredObjects, setFilteredObjects] = useState<FullCardProps[]>([]);
     const [isLoadingMatches, setIsLoadingMatches] = useState(false);
     const [searchError, setSearchError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     useEffect(() => {
         const fetchLostObjects = async () => {
+            setLoading(true);
             try {
-                const posts: Post[] = await getPosts(1); // 1 for "LOST"
+                const { posts, total }: { posts: Post[], total: number } = await getPosts(1, 0, 8); // 1 for "LOST", pagina 0, tamaño 8 por defecto
 
                 if (posts) {
                     const userIds = [...new Set(posts.map(post => post.user_id).filter(Boolean))];
@@ -61,9 +66,12 @@ export const useLostObjects = () => {
                     });
                     setLostObjects(mappedPosts);
                     setFilteredObjects(mappedPosts);
+                    setHasMore(mappedPosts.length < total); // Si el número de objetos cargados es menor al total, hay más por cargar
                 }
+                setLoading(false);
             } catch (error) {
                 console.error("Error fetching lost objects:", error);
+                setLoading(false);
             }
         };
 
@@ -134,12 +142,68 @@ export const useLostObjects = () => {
             const matchesData = data.matches || [];
             const matchIds = matchesData.map((m: any) => m.id);
 
-            // Filter and Sort
-            // If objectsToFilter is empty (not loaded yet), this returns empty.
-            // But usually this is called when user interacts, so objects should be loaded.
-            const matches = objectsToFilter.filter(obj => matchIds.includes(obj.id));
+            if (matchIds.length === 0) {
+                setPossibleMatches([]);
+                return;
+            }
+
+            // Consultar Supabase directamente por los IDs de los matches
+            const { data: matchPosts, error: postsError } = await supabaseClient
+                .from('posts')
+                .select(`
+                    *,
+                    location_area (
+                        location
+                    )
+                `)
+                .in('id', matchIds);
+
+            if (postsError) throw postsError;
+
+            if (!matchPosts || matchPosts.length === 0) {
+                setPossibleMatches([]);
+                return;
+            }
+
+            // Obtener perfiles de usuarios de los matches
+            const userIds = [...new Set(matchPosts.map(post => post.user_id).filter(Boolean))];
+            let profiles: UserProfile[] = [];
+
+            if (userIds.length > 0) {
+                const { data: profilesData, error: profileError } = await supabaseClient
+                    .rpc('get_public_user_profiles', { user_ids: userIds });
+
+                if (!profileError && profilesData) {
+                    profiles = profilesData;
+                }
+            }
+
+            const profileMap = new Map<string, UserProfile>();
+            profiles.forEach((p: UserProfile) => profileMap.set(p.user_id, p));
+
+            // Mapear los posts a FullCardProps
+            const mappedMatches: FullCardProps[] = matchPosts.map((post) => {
+                const userProfile = profileMap.get(post.user_id);
+                return {
+                    id: post.id,
+                    status: post.post_state_id === 1 ? 'lost' : 'found',
+                    imageUrl: post.photo_url || '',
+                    altText: post.title,
+                    title: post.title,
+                    date: new Date(post.date_was_found || post.created_at).toLocaleDateString(),
+                    rawDate: post.date_was_found || post.created_at,
+                    location: post.location || 'Sin ubicación',
+                    locationAreaName: post.location_area?.location || '',
+                    description: post.description || 'Sin descripción',
+                    userId: post.user_id,
+                    authorName: userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : 'Usuario Anónimo',
+                    authorAvatarUrl: userProfile?.photo_profile_url || null,
+                    categoryId: post.product_category_id || 0,
+                };
+            });
             
-            const sortedMatches = matches.sort((a, b) => {
+            // Ordenar por el orden de la API (similarity)
+            const sortedMatches = mappedMatches.sort((a, b) => {
                 const indexA = matchIds.indexOf(a.id);
                 const indexB = matchIds.indexOf(b.id);
                 return indexA - indexB;
@@ -188,28 +252,81 @@ export const useLostObjects = () => {
         }
     }, [lostObjects, performSearch]);
 
+    const loadMore = async () => {
+        if (isLoadingMore || !hasMore) return;
+        
+        setIsLoadingMore(true);
+        try {
+            const nextPage = page + 1;
+            const { posts, total } = await getPosts(1, nextPage, 8);
+
+            if (posts && posts.length > 0) {
+                const userIds = [...new Set(posts.map(post => post.user_id).filter(Boolean))];
+                
+                let profiles: UserProfile[] = [];
+                if (userIds.length > 0) {
+                    const { data, error: profileError } = await supabaseClient
+                        .rpc('get_public_user_profiles', { user_ids: userIds });
+
+                    if (!profileError && data) {
+                        profiles = data;
+                    }
+                }
+
+                const profileMap = new Map<string, UserProfile>();
+                profiles.forEach((p: UserProfile) => profileMap.set(p.user_id, p));
+
+                const mappedPosts: FullCardProps[] = posts.map((post) => {
+                    const userProfile = profileMap.get(post.user_id);
+                    return {
+                        id: post.id,
+                        status: post.post_state_id === 1 ? 'lost' : 'found',
+                        imageUrl: post.photo_url || '',
+                        altText: post.title,
+                        title: post.title,
+                        date: new Date(post.date_was_found || post.created_at).toLocaleDateString(),
+                        rawDate: post.date_was_found || post.created_at,
+                        location: post.location || 'Sin ubicación',
+                        locationAreaName: post.location_area_name || '',
+                        description: post.description || 'Sin descripción',
+                        userId: post.user_id,
+                        authorName: userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : 'Usuario Anónimo',
+                        authorAvatarUrl: userProfile?.photo_profile_url || null,
+                        categoryId: post.product_category_id || 0,
+                    };
+                });
+
+                const updatedObjects = [...lostObjects, ...mappedPosts];
+                setLostObjects(updatedObjects);
+                setFilteredObjects(updatedObjects);
+                setPage(nextPage);
+                setHasMore(updatedObjects.length < total);
+            } else {
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Error loading more objects:", error);
+        } finally {
+            setIsLoadingMore(false);
+        }
+    };
+
         return {
 
             lostObjects: filteredObjects,
-
             possibleMatches,
-
-            getPossibleMatches, 
-
+            getPossibleMatches,
             filterObjectsByTerm,
-
             clearSearch: () => {
-
                 clearSearch();
-
                 setSearchError(null);
-
             },
-
             isLoadingMatches,
-
-            searchError
-
+            loading,
+            searchError,
+            loadMore,
+            hasMore,
+            isLoadingMore
         }
 
     }

@@ -23,7 +23,8 @@ import {
   Alert,
   AlertIcon,
   AlertTitle,
-  AlertDescription
+  AlertDescription,
+  Spinner
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { StarIcon } from '@chakra-ui/icons';
@@ -41,7 +42,7 @@ import type { FullCardProps } from '@/types';
 export default function LostObjects() {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const { lostObjects, possibleMatches, getPossibleMatches, clearSearch, isLoadingMatches, searchError } = useLostObjects();
+  const { lostObjects, possibleMatches, getPossibleMatches, clearSearch, isLoadingMatches, searchError, loading, loadMore, hasMore, isLoadingMore } = useLostObjects();
   const { getCategories, getUserById } = useSchemas();
   const { createThreaForPost } = useLostObjectPageSchemas();
 
@@ -211,7 +212,11 @@ export default function LostObjects() {
 
           {/* TARJETAS */}
           <Box w="100%" mt={4}>
-            {filteredObjects.length === 0 ? (
+            {loading ? (
+              <Center py={20} bg="white" borderRadius="xl" shadow="sm">
+                <Spinner size="xl" color="#00569c" thickness="4px" />
+              </Center>
+            ) : filteredObjects.length === 0 ? (
               <Center py={20} bg="white" borderRadius="xl" shadow="sm">
                 <Text fontSize="xl" color="gray.500">No hay objetos que coincidan.</Text>
               </Center>
@@ -237,6 +242,28 @@ export default function LostObjects() {
                   </Box>
                 ))}
               </SimpleGrid>
+            )}
+            {/* Botón Cargar Más */}
+            {hasMore && !loading && filteredObjects.length > 0 && (
+              <Box textAlign="center" mt={6}>
+                <Button
+                  onClick={loadMore}
+                  isLoading={isLoadingMore}
+                  colorScheme="blue"
+                  size="lg"
+                  loadingText="Cargando..."
+                >
+                  Cargar más objetos
+                </Button>
+              </Box>
+            )}
+            {/* Mensaje: Ya son todos los objetos */}
+            {!hasMore && !loading && filteredObjects.length > 0 && (
+              <Box textAlign="center" mt={6} py={4}>
+                <Text fontSize="md" color="blue.500" fontWeight="bold">
+                  Estos son todos los objetos perdidos disponibles
+                </Text>
+              </Box>
             )}
           </Box>
 

@@ -21,6 +21,7 @@ import { PermissionsTable } from './components/pages/admin/permissions/Permissio
 import { CategoriesTable } from './components/pages/admin/categories/CategoriesTable.tsx';
 import { RolePermissionsTable } from './components/pages/admin/rolePermissions/RolePermissionsTable.tsx';
 import MetricasML from "./pages/admin/MetricasML.tsx";
+import ResetPassword from "./components/pages/reset-password/ResetPassword.tsx";
 
 function App() {
   // Elimina el useAuth aquí, solo usa el Provider
@@ -40,11 +41,11 @@ function App() {
           <Route
             path="/objetos-perdidos"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <LostObjects />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route
@@ -59,51 +60,51 @@ function App() {
           <Route
             path="/publicar-objeto"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <PublishObject />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route
             path="/chats/:threadId?"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <Chats />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route
             path="/perfil"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <Profile />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route
             path="/perfil/:userId"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <Profile />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route
             path="/settings"
             element={
-              <ProtectedRoute>
-                <MainLayout>
+              <MainLayout>
+                <ProtectedRoute>
                   <ProfileSettings />
-                </MainLayout>
-              </ProtectedRoute>
+                </ProtectedRoute>
+              </MainLayout>
             }
           />
           <Route
@@ -187,6 +188,7 @@ function App() {
             }
           />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

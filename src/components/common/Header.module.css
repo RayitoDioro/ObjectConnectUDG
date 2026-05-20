@@ -1,0 +1,95 @@
+.navLink {
+  position: relative;
+  padding: 0.5rem 0.75rem;
+  font-weight: 600;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  letter-spacing: 0.3px;
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #f9b233;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.navLink:hover {
+  color: #f9b233;
+  transform: translateY(-2px);
+}
+
+.navLink:hover::after {
+  width: 100%;
+}
+
+/* Enlaces del drawer móvil */
+.drawerLink {
+  position: relative;
+  padding: 0.75rem 1rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-align: left;
+  border-radius: 0.5rem;
+}
+
+.drawerLink::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 60%;
+  background-color: #f9b233;
+  transition: all 0.3s ease;
+  border-radius: 0 4px 4px 0;
+}
+
+.drawerLink:hover {
+  color: #f9b233;
+  background-color: rgba(249, 178, 51, 0.1);
+  padding-left: 1.5rem;
+}
+
+.drawerLink:hover::before {
+  width: 4px;
+}
+
+/* Link especial para admin en drawer */
+.adminDrawerLink {
+  color: #f9b233;
+  font-weight: 700;
+}
+
+.adminDrawerLink:hover {
+  color: #ffffff;
+  background-color: rgba(249, 178, 51, 0.2);
+}
+
+/* Botón de iniciar sesión */
+.loginBtn {
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  background-color: #f9b233;
+  color: #0b2c5d;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.loginBtn:hover {
+  background-color: #d6982eff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}

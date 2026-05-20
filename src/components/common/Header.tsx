@@ -5,6 +5,7 @@ import { supabaseClient } from '@/supabaseClient';
 import udgLogo from '../../assets/logoUDG.png';
 import { Box, Flex, Image, Button, MenuButton, Menu, MenuList, MenuItem, Avatar, HStack, Link, IconButton, useDisclosure, Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerBody, VStack, Divider } from '@chakra-ui/react';
 import { HamburgerIcon, SettingsIcon } from '@chakra-ui/icons';
+import styles from './Header.module.css';
 
 const Header = () => {
   const { session, profile, isAdmin } = useAuth();
@@ -23,32 +24,27 @@ const Header = () => {
     navigate('/admin');
   };
 
-  const linkHoverStyle = {
-    color: 'brand.yellow',
-    borderRadius: 'md',
-    textDecoration: 'none'
-  };
-
   return (
     <Box as='header' bg='brand.blue' color='white' py={6} px={{ base:4, md:8 }} shadow='md' borderBottom='4px' borderBottomColor='brand.yellow'>
       <Flex justify='space-between' align='center' maxW='1200px' mx='auto'>
         <RouterLink to='/'>
-          <Image src={udgLogo} alt='Logo UDG' h={{ base: '45px', md: '60px' }} />
+          <Image src={udgLogo} alt='Logo UDG' h={{ base: '45px', md: '60px' }}
+          transition="all 0.3s ease" _hover={{ transform: 'scale(1.05)' }} />
         </RouterLink>
 
         {/* Enlaces para navegar en computadora */}
         <HStack as='nav' spacing={8} display={{ base: 'none', md: 'flex'}}>
-          <Link as={RouterLink} to="/objetos-perdidos" fontWeight='bold' _hover={linkHoverStyle}>
+          <Link as={RouterLink} to="/objetos-perdidos" className={styles.navLink} _hover={{ textDecoration: 'none' }}>
             Objetos perdidos
           </Link>
-          <Link as={RouterLink} to="/objetos-encontrados"  fontWeight='bold' _hover={linkHoverStyle}>
+          <Link as={RouterLink} to="/objetos-encontrados"  className={styles.navLink} _hover={{ textDecoration: 'none' }}>
             Objetos encontrados
           </Link>
-          <Link as={RouterLink} to="/publicar-objeto" fontWeight='bold' _hover={linkHoverStyle}>
+          <Link as={RouterLink} to="/publicar-objeto" className={styles.navLink} _hover={{ textDecoration: 'none' }}>
             Publicar objeto
           </Link>
           {session && (
-            <Link as={RouterLink} to="/Chats" fontWeight='bold' _hover={linkHoverStyle}>
+            <Link as={RouterLink} to="/Chats" className={styles.navLink} _hover={{ textDecoration: 'none' }}>
               Chats
             </Link>
           )}
@@ -66,6 +62,7 @@ const Header = () => {
                     variant='link' 
                     cursor='pointer' 
                     _hover={{transform: 'scale(1.1)' }}
+                    transition="all 0.3s ease"
                   >
                     <Box
                       border="4px solid"
@@ -98,7 +95,8 @@ const Header = () => {
                   </MenuList>
                 </Menu>
               ) : (
-                <Button as={RouterLink} to='/login' bg='brand.blueLight' color='white' _hover={{ bg: 'brand.blueTwo' }} >
+                <Button as={RouterLink} to='/login' bg='brand.blueLight' color='white' _hover={{ bg: 'brand.blueTwo', textDecoration: 'none' }} 
+                transition="all 0.3s ease" className={styles.loginBtn}>
                   Iniciar sesión
                 </Button>
               )
@@ -116,6 +114,7 @@ const Header = () => {
               _active={{ transform: 'scale(0.95)' }}
               display={{ base: 'none', md: 'flex' }}
               title='Panel Administrativo'
+              transition="all 0.3s ease"
             />
           )}
 
@@ -128,6 +127,7 @@ const Header = () => {
             _hover={{ bg: 'brand.yellow', color: 'brand.blue' }}
             display={{ base: 'flex', md: 'none' }}
             onClick={onDrawerOpen}
+            transition="all 0.3s ease"
           />
 
         </HStack>
@@ -140,13 +140,13 @@ const Header = () => {
           <DrawerCloseButton/>
           <DrawerHeader borderBottomWidth='2px' borderColor='brand.yellow'>Navegación</DrawerHeader>
           <DrawerBody>
-            <VStack>
-              <Link as={RouterLink} to='/objetos-perdidos' onClick={onDrawerClose} fontSize='lg' _hover={linkHoverStyle}>Objetos perdidos</Link>
-              <Link as={RouterLink} to='/objetos-encontrados' onClick={onDrawerClose} fontSize='lg' _hover={linkHoverStyle}>Objetos encontrados</Link>
-              <Link as={RouterLink} to='/publicar-objeto' onClick={onDrawerClose} fontSize='lg' _hover={linkHoverStyle}>Publicar objetos</Link>
-              {session && (<Link as={RouterLink} to='/Chats' onClick={onDrawerClose} fontSize='lg' _hover={linkHoverStyle}>Chats</Link>)}
+            <VStack spacing={2} align="stretch" py={2}>
+              <Link as={RouterLink} to='/objetos-perdidos' onClick={onDrawerClose} className={styles.drawerLink} _hover={{ textDecoration: 'none' }}>Objetos perdidos</Link>
+              <Link as={RouterLink} to='/objetos-encontrados' onClick={onDrawerClose} className={styles.drawerLink} _hover={{ textDecoration: 'none' }}>Objetos encontrados</Link>
+              <Link as={RouterLink} to='/publicar-objeto' onClick={onDrawerClose} className={styles.drawerLink} _hover={{ textDecoration: 'none' }}>Publicar objeto</Link>
+              {session && (<Link as={RouterLink} to='/Chats' onClick={onDrawerClose} className={styles.drawerLink} _hover={{ textDecoration: 'none' }}>Chats</Link>)}
 
-              <Divider/>
+              <Divider my={2}/>
 
               {/* Lógica de sesión en el drawer */}
               {
@@ -154,12 +154,12 @@ const Header = () => {
                   <>
                     {isAdmin && (
                       <>
-                        <Link as={RouterLink} to='/admin' onClick={onDrawerClose} fontSize='lg' fontWeight='bold' color='brand.yellow' _hover={{ textDecoration: 'double', opacity: 0.6}}>Panel Administrativo</Link>
-                        <Divider/>
+                        <Link as={RouterLink} to='/admin' onClick={onDrawerClose} className={`${styles.drawerLink} ${styles.adminDrawerLink}`} _hover={{ textDecoration: 'none' }}>Panel Administrativo</Link>
+                        <Divider my={2}/>
                       </>
                     )}
-                    <Link as={RouterLink} to='/perfil' onClick={onDrawerClose} fontSize='lg' fontWeight='bold' _hover={{ textDecoration: 'double', opacity: 0.6}}>Mi perfil</Link>
-                    <Link as={RouterLink} to='/settings' onClick={onDrawerClose} fontSize='lg' fontWeight='bold' _hover={{ textDecoration: 'double', opacity: 0.6}}>
+                    <Link as={RouterLink} to='/perfil' onClick={onDrawerClose} className={styles.drawerLink} _hover={{ textDecoration: 'none' }}>Mi perfil</Link>
+                    <Link as={RouterLink} to='/settings' onClick={onDrawerClose} className={styles.drawerLink} _hover={{ textDecoration: 'none' }}>
                       Configuración
                     </Link>
                     <Button 
@@ -169,6 +169,7 @@ const Header = () => {
                       }}
                       colorScheme='red'
                       w='full'
+                      mt={4}
                     >
                       Cerrar sesión
                     </Button>
@@ -178,11 +179,10 @@ const Header = () => {
                     as={RouterLink} 
                     to='/login' onClick={onDrawerClose} 
                     bg='brand.yellow' 
-                    color='white'
+                    color='brand.blue'
                     w='full' 
+                    fontWeight="bold"
                     _hover={{ 
-                      textDecoration: 'none', 
-                      color: 'gray.300',
                       bg: 'brand.yellowTwo'
                     }} 
                     >
