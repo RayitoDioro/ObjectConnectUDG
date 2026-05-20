@@ -154,12 +154,12 @@ const Header = () => {
                   <>
                     {isAdmin && (
                       <>
-                        <Link as={RouterLink} to='/admin' onClick={onDrawerClose} className={`${styles.drawerLink} ${styles.adminDrawerLink}`}>Panel Administrativo</Link>
+                        <Link as={RouterLink} to='/admin' onClick={onDrawerClose} className={`${styles.drawerLink} ${styles.adminDrawerLink}`} _hover={{ textDecoration: 'none' }}>Panel Administrativo</Link>
                         <Divider my={2}/>
                       </>
                     )}
-                    <Link as={RouterLink} to='/perfil' onClick={onDrawerClose} className={styles.drawerLink}>Mi perfil</Link>
-                    <Link as={RouterLink} to='/settings' onClick={onDrawerClose} className={styles.drawerLink}>
+                    <Link as={RouterLink} to='/perfil' onClick={onDrawerClose} className={styles.drawerLink} _hover={{ textDecoration: 'none' }}>Mi perfil</Link>
+                    <Link as={RouterLink} to='/settings' onClick={onDrawerClose} className={styles.drawerLink} _hover={{ textDecoration: 'none' }}>
                       Configuración
                     </Link>
                     <Button 
