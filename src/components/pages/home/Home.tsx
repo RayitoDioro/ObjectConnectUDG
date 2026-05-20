@@ -56,9 +56,9 @@ const Home = () => {
           setDbCategories(catData); 
         }
 
-        // Cargar solo 15 perdidos y 15 encontrados
-        const { posts: lostPosts } = await getPosts(1, 0, 16); // postStateId=1 (LOST), page=0, pageSize=15
-        const { posts: foundPosts } = await getPosts(2, 0, 16); // postStateId=2 (FOUND), page=0, pageSize=15
+        // Cargar solo 16 perdidos y 16 encontrados
+        const { posts: lostPosts } = await getPosts(1, 0, 16); // postStateId=1 (LOST), page=0, pageSize=16
+        const { posts: foundPosts } = await getPosts(2, 0, 16); // postStateId=2 (FOUND), page=0, pageSize=16
         
         const rawPosts = [...lostPosts, ...foundPosts];
         const userIds = [...new Set(rawPosts.map(post => post.user_id))];
