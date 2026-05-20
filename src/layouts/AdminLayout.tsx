@@ -1,7 +1,9 @@
-import { Box, Flex, VStack, HStack, Heading, Button, Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerBody, useDisclosure, IconButton } from '@chakra-ui/react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Box, Flex, VStack, HStack, Heading, Button, Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerBody, useDisclosure, IconButton, Center, Spinner } from '@chakra-ui/react';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { HamburgerIcon, ArrowBackIcon, CloseIcon } from '@chakra-ui/icons';
 import { type ReactNode, useState } from 'react';
+import { usePermissions } from '@/hooks/usePermissions';
+import { PERMISSIONS } from '@/constants/permissions';
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -12,17 +14,45 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const { hasAnyPermission, loading } = usePermissions();
 
   const navItems = [
-    { label: 'Dashboard', path: '/admin' },
-    { label: 'Usuarios', path: '/admin/usuarios' },
-    { label: 'Roles', path: '/admin/roles' },
-    { label: 'Permisos', path: '/admin/permisos' },
-    { label: 'Permisos de rol', path: '/admin/rolePermisos' },
-    { label: 'Categorias', path: '/admin/categorias' },
+    { label: 'Dashboard', path: '/admin', permissions: [] },
+    { label: 'Usuarios', path: '/admin/usuarios', permissions: [PERMISSIONS.VIEW_USERS] },
+    { label: 'Roles', path: '/admin/roles', permissions: [PERMISSIONS.VIEW_ROLES] },
+    { label: 'Permisos', path: '/admin/permisos', permissions: [PERMISSIONS.VIEW_PERMISSIONS] },
+    { label: 'Permisos de rol', path: '/admin/rolePermisos', permissions: [PERMISSIONS.VIEW_ROLES] },
+    { label: 'Categorias', path: '/admin/categorias', permissions: [PERMISSIONS.VIEW_CATEGORIES] },
     // { label: 'Posts', path: '/admin/posts' },
-    {label: "Métricas ML", path: "/admin/metricas" }
+    {label: "Métricas ML", path: "/admin/metricas", permissions: [PERMISSIONS.VIEW_ML_MODULE] }
   ];
+
+  // Filtrar items según permisos del usuario
+  const visibleNavItems = navItems.filter(item => 
+    item.permissions.length === 0 || hasAnyPermission(item.permissions)
+  );
+
+  // Si no tiene ningún permiso de admin, redirigir al home
+  const hasAnyAdminPermission = hasAnyPermission([
+    PERMISSIONS.VIEW_USERS,
+    PERMISSIONS.VIEW_ROLES,
+    PERMISSIONS.VIEW_PERMISSIONS,
+    PERMISSIONS.VIEW_CATEGORIES,
+    PERMISSIONS.VIEW_POSTS_ADMIN,
+    PERMISSIONS.VIEW_ML_MODULE
+  ]);
+
+  if (loading) {
+    return (
+      <Center h="100vh">
+        <Spinner size="xl" color="brand.blue" thickness="4px" />
+      </Center>
+    );
+  }
+
+  if (!hasAnyAdminPermission) {
+    return <Navigate to="/" replace />;
+  }
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -61,8 +91,8 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         <Heading size="md" mb={8} color="brand.yellow">
           Panel Administrativo
         </Heading>
-        <VStack spacing={2} align="stretch">
-          {navItems.map((item) => (
+        <VStack spacing={2} align="stretch" opacity={isSidebarCollapsed ? 0 : 1} transition={isSidebarCollapsed ? "opacity 0.2s ease" : "opacity 0.3s ease 0.2s"}>
+          {visibleNavItems.map((item) => (
             <NavButton key={item.path} label={item.label} path={item.path} />
           ))}
         </VStack>
@@ -144,7 +174,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             </DrawerHeader>
             <DrawerBody>
               <VStack spacing={2} align="stretch">
-                {navItems.map((item) => (
+                {visibleNavItems.map((item) => (
                   <NavButton
                     key={item.path}
                     label={item.label}
@@ -157,7 +187,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         </Drawer>
 
         {/* Contenido */}
-        <Box p={{ base: 4, md: 8 }} maxW="1400px" mx="auto">
+        <Box p={{ base: 4, md: 8 }} maxW="1400px" mx="auto" >
           {children}
         </Box>
       </Box>

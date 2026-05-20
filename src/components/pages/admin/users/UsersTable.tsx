@@ -28,6 +28,8 @@ import { FiEdit, FiTrash2, FiChevronLeft, FiChevronRight,
   FiArrowDown } from 'react-icons/fi';
 import { UserFormModal } from './UserFormModal';
 import { DeleteConfirmationModal } from '../common/DeleteConfirmationModal';
+import { usePermissions } from '@/hooks/usePermissions';
+import { PERMISSIONS } from '@/constants/permissions';
 
 // Constantes
 const USERS_PAGE_SIZE = 5;
@@ -48,6 +50,9 @@ export const UsersTable = () => {
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
+
+  // Hook de permisos
+  const { hasPermission } = usePermissions();
 
   const {
     isOpen: isFormOpen,
@@ -418,22 +423,26 @@ export const UsersTable = () => {
                   </Td>
                   <Td textAlign="center" py={3}>
                     <HStack spacing={2} justify="center">
-                      <IconButton
-                        aria-label="Editar"
-                        icon={<Icon as={FiEdit} />}
-                        size="sm"
-                        colorScheme="blue"
-                        variant="ghost"
-                        onClick={() => handleEdit(user)}
-                      />
-                      <IconButton
-                        aria-label="Eliminar"
-                        icon={<Icon as={FiTrash2} />}
-                        size="sm"
-                        colorScheme="red"
-                        variant="ghost"
-                        onClick={() => handleDelete(user)}
-                      />
+                      {hasPermission(PERMISSIONS.EDIT_USERS) && (
+                        <IconButton
+                          aria-label="Editar"
+                          icon={<Icon as={FiEdit} />}
+                          size="sm"
+                          colorScheme="blue"
+                          variant="ghost"
+                          onClick={() => handleEdit(user)}
+                        />
+                      )}
+                      {hasPermission(PERMISSIONS.DELETE_USERS) && (
+                        <IconButton
+                          aria-label="Eliminar"
+                          icon={<Icon as={FiTrash2} />}
+                          size="sm"
+                          colorScheme="red"
+                          variant="ghost"
+                          onClick={() => handleDelete(user)}
+                        />
+                      )}
                     </HStack>
                   </Td>
                 </Tr>

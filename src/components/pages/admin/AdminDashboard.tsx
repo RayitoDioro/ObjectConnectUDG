@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { type Statistics } from '@/types';
 import { useEffect, useState } from 'react';
 import { supabaseClient } from '@/supabaseClient';
+import { usePermissions } from '@/hooks/usePermissions';
+import { PERMISSIONS } from '@/constants/permissions';
 
 interface ExtendedStatistics extends Statistics {
   totalPermissions: number;
@@ -12,6 +14,7 @@ interface ExtendedStatistics extends Statistics {
 export const AdminDashboard = () => {
   const navigate = useNavigate();
   const toast = useToast();
+  const { hasPermission } = usePermissions();
   const [stats, setStats] = useState<ExtendedStatistics>({
     totalUsers: 0,
     totalRoles: 0,
@@ -152,27 +155,31 @@ export const AdminDashboard = () => {
             justify="center"
             w="full"
           >
-            <Button 
-              onClick={() => navigate('/admin/usuarios')}
-              bg="brand.yellow"
-              color="brand.blue"
-              fontWeight="bold"
-              _hover={{ bg: 'brand.yellowTwo' }}
-              w={{ base: '100%', sm: 'auto' }}
-            >
-              Gestionar Usuarios
-            </Button>
+            {hasPermission(PERMISSIONS.VIEW_USERS) && (
+              <Button 
+                onClick={() => navigate('/admin/usuarios')}
+                bg="brand.yellow"
+                color="brand.blue"
+                fontWeight="bold"
+                _hover={{ bg: 'brand.yellowTwo' }}
+                w={{ base: '100%', sm: 'auto' }}
+              >
+                Gestionar Usuarios
+              </Button>
+            )}
             
-            <Button 
-              onClick={() => navigate('/admin/roles')}
-              bg="brand.yellow"
-              color="brand.blue"
-              fontWeight="bold"
-              _hover={{ bg: 'brand.yellowTwo' }}
-              w={{ base: '100%', sm: 'auto' }}
-            >
-              Gestionar Roles
-            </Button>
+            {hasPermission(PERMISSIONS.VIEW_ROLES) && (
+              <Button 
+                onClick={() => navigate('/admin/roles')}
+                bg="brand.yellow"
+                color="brand.blue"
+                fontWeight="bold"
+                _hover={{ bg: 'brand.yellowTwo' }}
+                w={{ base: '100%', sm: 'auto' }}
+              >
+                Gestionar Roles
+              </Button>
+            )}
 
             {/* <Button 
               onClick={() => navigate('/admin/posts')}
@@ -185,38 +192,57 @@ export const AdminDashboard = () => {
               Gestionar Posts
             </Button> */}
 
-            <Button 
-              onClick={() => navigate('/admin/permisos')}
-              bg="brand.yellow"
-              color="brand.blue"
-              fontWeight="bold"
-              _hover={{ bg: 'brand.yellowTwo' }}
-              w={{ base: '100%', sm: 'auto' }}
-            >
-              Gestionar Permisos
-            </Button>
+            {hasPermission(PERMISSIONS.VIEW_PERMISSIONS) && (
+              <Button 
+                onClick={() => navigate('/admin/permisos')}
+                bg="brand.yellow"
+                color="brand.blue"
+                fontWeight="bold"
+                _hover={{ bg: 'brand.yellowTwo' }}
+                w={{ base: '100%', sm: 'auto' }}
+              >
+                Gestionar Permisos
+              </Button>
+            )}
 
-            <Button 
-              onClick={() => navigate('/admin/rolePermisos')}
-              bg="brand.yellow"
-              color="brand.blue"
-              fontWeight="bold"
-              _hover={{ bg: 'brand.yellowTwo' }}
-              w={{ base: '100%', sm: 'auto' }}
-            >
-              Permisos de Rol
-            </Button>
+            {hasPermission(PERMISSIONS.VIEW_ROLES) && (
+              <Button 
+                onClick={() => navigate('/admin/rolePermisos')}
+                bg="brand.yellow"
+                color="brand.blue"
+                fontWeight="bold"
+                _hover={{ bg: 'brand.yellowTwo' }}
+                w={{ base: '100%', sm: 'auto' }}
+              >
+                Permisos de Rol
+              </Button>
+            )}
 
-            <Button 
-              onClick={() => navigate('/admin/categorias')}
-              bg="brand.yellow"
-              color="brand.blue"
-              fontWeight="bold"
-              _hover={{ bg: 'brand.yellowTwo' }}
-              w={{ base: '100%', sm: 'auto' }}
-            >
-              Gestionar Categorías
-            </Button>
+            {hasPermission(PERMISSIONS.VIEW_CATEGORIES) && (
+              <Button 
+                onClick={() => navigate('/admin/categorias')}
+                bg="brand.yellow"
+                color="brand.blue"
+                fontWeight="bold"
+                _hover={{ bg: 'brand.yellowTwo' }}
+                w={{ base: '100%', sm: 'auto' }}
+              >
+                Gestionar Categorías
+              </Button>
+            )}
+
+            {hasPermission(PERMISSIONS.VIEW_ML_MODULE) && (
+              <Button 
+                onClick={() => navigate('/admin/metricas')}
+                bg="brand.yellow"
+                color="brand.blue"
+                fontWeight="bold"
+                _hover={{ bg: 'brand.yellowTwo' }}
+                w={{ base: '100%', sm: 'auto' }}
+              >
+                Métricas ML
+              </Button>
+            )}
           </HStack>
         </VStack>
       </Box>
