@@ -16,9 +16,11 @@ import {
   Heading,
 } from '@chakra-ui/react';
 import { ExternalLinkIcon } from '@chakra-ui/icons';
+import { useAuth } from '@/context/AuthContext';
 import styles from './Footer.module.css';
 
 const Footer = () => {
+  const { isAdmin } = useAuth();
   const [activeModal, setActiveModal] = useState<'contact' | 'sitemap' | 'privacy' | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -35,43 +37,23 @@ const Footer = () => {
   return (
     <>
       <footer className={styles.footer}>
-        <p>&copy; {new Date().getFullYear()} Universidad de Guadalajara. Todos los derechos reservados.</p>
+        <p className={styles.copyright}>&copy; {new Date().getFullYear()} Universidad de Guadalajara. Todos los derechos reservados.</p>
         <div className={styles.footerLinks}>
           <button 
             onClick={() => handleOpenModal('contact')}
-            style={{ 
-            background: 'none', 
-            border: 'none', 
-            color: 'inherit', 
-            cursor: 'pointer', 
-            textDecoration: 'underline',
-            marginRight: '20px'
-          }}
+            className={styles.footerButton}
           >
             Contacto
           </button>
           <button 
             onClick={() => handleOpenModal('sitemap')}
-            style={{ 
-            background: 'none', 
-            border: 'none', 
-            color: 'inherit', 
-            cursor: 'pointer', 
-            textDecoration: 'underline',
-            marginRight: '20px'
-          }}
+            className={styles.footerButton}
           >
             Mapa del sitio
           </button>
           <button 
             onClick={() => handleOpenModal('privacy')}
-            style={{ 
-            background: 'none', 
-            border: 'none', 
-            color: 'inherit', 
-            cursor: 'pointer', 
-            textDecoration: 'underline'
-          }}
+            className={styles.footerButton}
           >
             Aviso de Privacidad
           </button>
@@ -148,11 +130,11 @@ const Footer = () => {
                 <Heading size="sm" color="brand.blue" mb={3}>
                   Principal
                 </Heading>
-                <VStack spacing={1} align="start" fontSize="sm">
-                  <Link href="/">Inicio</Link>
-                  <Link href="/objetos-perdidos">Objetos Perdidos</Link>
-                  <Link href="/objetos-encontrados">Objetos Encontrados</Link>
-                  <Link href="/publicar-objeto">Publicar objeto</Link>
+                <VStack spacing={2} align="start" fontSize="sm">
+                  <Link href="/" _hover={{ color: 'brand.yellow', textDecoration: 'none' }} transition="all 0.2s">Inicio</Link>
+                  <Link href="/objetos-perdidos" _hover={{ color: 'brand.yellow', textDecoration: 'none' }} transition="all 0.2s">Objetos Perdidos</Link>
+                  <Link href="/objetos-encontrados" _hover={{ color: 'brand.yellow', textDecoration: 'none' }} transition="all 0.2s">Objetos Encontrados</Link>
+                  <Link href="/publicar-objeto" _hover={{ color: 'brand.yellow', textDecoration: 'none' }} transition="all 0.2s">Publicar objeto</Link>
                 </VStack>
               </Box>
 
@@ -160,41 +142,49 @@ const Footer = () => {
                 <Heading size="sm" color="brand.blue" mb={3}>
                   Usuario
                 </Heading>
-                <VStack spacing={1} align="start" fontSize="sm">
-                  <Link href="/perfil">Mi Perfil y posts</Link>
-                  <Link href="/settings">Configuración</Link>
-                  <Link href="/logout">Cerrar Sesión</Link>
+                <VStack spacing={2} align="start" fontSize="sm">
+                  <Link href="/perfil" _hover={{ color: 'brand.yellow', textDecoration: 'none' }} transition="all 0.2s">Mi Perfil y posts</Link>
+                  <Link href="/settings" _hover={{ color: 'brand.yellow', textDecoration: 'none' }} transition="all 0.2s">Configuración</Link>
                 </VStack>
               </Box>
 
-              <Box>
-                <Heading size="sm" color="brand.blue" mb={3}>
-                  Administración
-                </Heading>
-                <VStack spacing={1} align="start" fontSize="sm">
-                  <Link href="/admin">Dashboard</Link>
-                  <Link href="/admin/usuarios">Usuarios</Link>
-                  <Link href="/admin/roles">Roles</Link>
-                  <Link href="/admin/permisos">Permisos</Link>
-                  <Link href="/admin/categorias">Categorías</Link>
-                </VStack>
-              </Box>
+              {/* Sección de Admin - Solo visible para administradores */}
+              {isAdmin && (
+                <Box>
+                  <Heading size="sm" color="brand.blue" mb={3}>
+                    Administración
+                  </Heading>
+                  <VStack spacing={2} align="start" fontSize="sm">
+                    <Link href="/admin" _hover={{ color: 'brand.yellow', textDecoration: 'none' }} transition="all 0.2s">Dashboard</Link>
+                    <Link href="/admin/usuarios" _hover={{ color: 'brand.yellow', textDecoration: 'none' }} transition="all 0.2s">Usuarios</Link>
+                    <Link href="/admin/roles" _hover={{ color: 'brand.yellow', textDecoration: 'none' }} transition="all 0.2s">Roles</Link>
+                    <Link href="/admin/permisos" _hover={{ color: 'brand.yellow', textDecoration: 'none' }} transition="all 0.2s">Permisos</Link>
+                    <Link href="/admin/categorias" _hover={{ color: 'brand.yellow', textDecoration: 'none' }} transition="all 0.2s">Categorías</Link>
+                  </VStack>
+                </Box>
+              )}
 
               <Box>
                 <Heading size="sm" color="brand.blue" mb={3}>
                   Legal
                 </Heading>
-                <VStack spacing={1} align="start" fontSize="sm">
+                <VStack spacing={2} align="start" fontSize="sm">
                   <Link cursor="pointer" onClick={() => {
                     handleCloseModal();
                     setTimeout(() => handleOpenModal('privacy'), 100);
-                  }}>
+                  }}
+                    _hover={{ color: 'brand.yellow', textDecoration: 'none' }}
+                      transition="all 0.2s"
+                  >
                     Aviso de Privacidad
                   </Link>
                   <Link cursor="pointer" onClick={() => {
                     handleCloseModal();
                     setTimeout(() => handleOpenModal('contact'), 100);
-                  }}>
+                  }}
+                    _hover={{ color: 'brand.yellow', textDecoration: 'none' }}
+                      transition="all 0.2s"
+                  >
                     Contacto
                   </Link>
                 </VStack>
