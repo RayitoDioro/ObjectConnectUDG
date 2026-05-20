@@ -30,6 +30,11 @@ const FoundObjects = () => {
   const [foundPosts, setFoundPosts] = useState<FullCardProps[]>([]);
   const [loading, setLoading] = useState(true);
 
+    // ESTADOS DE PAGINACIÓN
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   // ESTADOS PARA LOS FILTROS
   const [dbCategories, setDbCategories] = useState<CategoryDB[]>([]);
   const [searchObj, setSearchObj] = useState('');
@@ -57,13 +62,14 @@ const FoundObjects = () => {
         })));
 
         // B. Bajamos todas las publicaciones para las estadísticas
-        const { posts: allPosts}: { posts: Post[] } = await getPosts();
+        const { posts: allPosts }: { posts: Post[] } = await getPosts();
         setAllPostsForStats(allPosts);
         
-        const onlyFound = allPosts.filter(post => post.post_state_id === 2);
+        // C. Bajamos solo los primeros 8 objetos ENCONTRADOS con paginación
+        const { posts: foundPostsPage, total }: { posts: Post[], total: number } = await getPosts(2, 0, 8);
 
-        // C. Buscamos a los autores de estos posts en un solo viaje
-        const userIds = [...new Set(onlyFound.map(post => post.user_id))];
+        // D. Buscamos a los autores de estos posts en un solo viaje
+        const userIds = [...new Set(foundPostsPage.map(post => post.user_id))];
         let profilesData: any[] = [];
 
         if (userIds.length > 0) {
@@ -77,8 +83,8 @@ const FoundObjects = () => {
           }
         }
 
-        // D. Armamos las tarjetas con la información COMPLETA
-        const mappedPosts: FullCardProps[] = onlyFound.map((post) => {
+        // E. Armamos las tarjetas con la información COMPLETA
+        const mappedPosts: FullCardProps[] = foundPostsPage.map((post) => {
           const authorProfile = profilesData.find(p => p.user_id === post.user_id);
 
           return {
@@ -100,6 +106,7 @@ const FoundObjects = () => {
         });
 
         setFoundPosts(mappedPosts);
+        setHasMore(mappedPosts.length < total); // Si hay menos de 8 o el total es mayor, hay más por cargar
       } catch (error) {
         console.error("Error cargando objetos encontrados:", error);
       } finally {
@@ -109,6 +116,64 @@ const FoundObjects = () => {
 
     fetchFoundObjects();
   }, []);
+
+    // 2. FUNCIÓN LOAD MORE
+  const loadMore = async () => {
+    if (isLoadingMore || !hasMore) return;
+    
+    setIsLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const { posts, total } = await getPosts(2, nextPage, 8); // 2 = FOUND state
+
+      if (posts && posts.length > 0) {
+        const userIds = [...new Set(posts.map(post => post.user_id).filter(Boolean))];
+        
+        let profiles: any[] = [];
+        if (userIds.length > 0) {
+          const { data, error: profileError } = await supabaseClient
+            .from('user_profile')
+            .select('user_id, first_name, last_name, photo_profile_url')
+            .in('user_id', userIds);
+
+          if (!profileError && data) {
+            profiles = data;
+          }
+        }
+
+        const mappedPosts: FullCardProps[] = posts.map((post) => {
+          const authorProfile = profiles.find(p => p.user_id === post.user_id);
+          return {
+            id: post.id,
+            status: 'found',
+            imageUrl: post.photo_url || '',
+            altText: post.title,
+            title: post.title,
+            date: new Date(post.date_was_found || post.created_at).toLocaleDateString(),
+            rawDate: post.date_was_found || post.created_at,
+            location: post.location || 'Ubicación no especificada',
+            locationAreaName: post.location_area_name || '',
+            description: post.description || 'Sin descripción',
+            userId: post.user_id,
+            categoryId: (post as any).product_category_id,
+            authorName: authorProfile ? `${authorProfile.first_name} ${authorProfile.last_name}` : 'Usuario Anónimo',
+            authorAvatarUrl: authorProfile ? authorProfile.photo_profile_url : "",
+          };
+        });
+
+        const updatedObjects = [...foundPosts, ...mappedPosts];
+        setFoundPosts(updatedObjects);
+        setPage(nextPage);
+        setHasMore(updatedObjects.length < total);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Error loading more objects:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   // CÁLCULO DE ESTADÍSTICAS TOP 3
   const stats = useMemo(() => {
@@ -318,6 +383,29 @@ const FoundObjects = () => {
                   </Box>
                 ))}
               </SimpleGrid>
+            )}
+
+            {/* Botón Cargar Más */}
+            {hasMore && !loading && filteredObjects.length > 0 && (
+              <Box textAlign="center" mt={6}>
+                <Button
+                  onClick={loadMore}
+                  isLoading={isLoadingMore}
+                  colorScheme="green"
+                  size="lg"
+                  loadingText="Cargando..."
+                >
+                  Cargar más objetos
+                </Button>
+              </Box>
+            )}
+            {/* Mensaje: Ya son todos los objetos */}
+            {!hasMore && !loading && filteredObjects.length > 0 && (
+              <Box textAlign="center" mt={6} py={4}>
+                <Text fontSize="md" color="green.500" fontWeight="bold">
+                  Estos son todos los objetos encontrados disponibles
+                </Text>
+              </Box>
             )}
           </Box>
 
