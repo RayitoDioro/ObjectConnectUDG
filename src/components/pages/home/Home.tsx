@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import PresentationSection from './subComponents/PresentationSection';
 import FilterSortControls from './subComponents/FilterSortControls';
 import ObjectGrid from "./subComponents/ObjectGrid";
-import { type Post } from "@/types"; 
 import { useObjectFilter } from "./hooks/useObjectFilter";
 import { useSchemas } from "@/hooks/useSchemas"; 
 // IMPORTAMOS TU HOOK PARA CREAR HILOS
@@ -57,7 +56,11 @@ const Home = () => {
           setDbCategories(catData); 
         }
 
-        const rawPosts: Post[] = await getPosts();
+        // Cargar solo 15 perdidos y 15 encontrados
+        const { posts: lostPosts } = await getPosts(1, 0, 16); // postStateId=1 (LOST), page=0, pageSize=15
+        const { posts: foundPosts } = await getPosts(2, 0, 16); // postStateId=2 (FOUND), page=0, pageSize=15
+        
+        const rawPosts = [...lostPosts, ...foundPosts];
         const userIds = [...new Set(rawPosts.map(post => post.user_id))];
         let profilesData: any[] = [];
 
@@ -134,7 +137,7 @@ const Home = () => {
       toast({
         title: 'Inicia sesión',
         description: 'Debes iniciar sesión para poder enviar mensajes.',
-        status: 'warning',
+        status: 'info',
         duration: 3000,
         isClosable: true,
       });

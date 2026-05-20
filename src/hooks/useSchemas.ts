@@ -80,7 +80,7 @@ export function useSchemas() {
             return inserted;
     }
 
-    async function getPosts(postStateId?: number) {
+    async function getPosts(postStateId?: number, page?: number, pageSize?: number) {
         let query = supabaseClient
             .from('posts')
             .select(`
@@ -88,18 +88,29 @@ export function useSchemas() {
                 location_area (
                     location
                 )
-            `);
+            `, { count: 'exact' }) // se agrega count para saber cuántos hay en total
+            .order('created_at', { ascending: false }); // orden consistente
         
         if (postStateId) query = query.eq('post_state_id', postStateId);
 
-        const { data, error } = await query;
+        // Si se especifica paginación, aplicar .range()
+        if (page !== undefined && pageSize !== undefined) {
+            const from = page * pageSize;
+            const to = from + pageSize - 1;
+            query = query.range(from, to);
+        }
+
+        const { data, error, count } = await query;
         if (error) throw error;
 
         // Aplanamos el resultado para que sea más fácil de usar
-        return data.map(post => ({
-            ...post,
-            location_area_name: post.location_area?.location || null
-        }));
+        return {
+            posts: data?.map(post => ({
+                ...post,
+                location_area_name: post.location_area?.location || null
+            })) || [],
+            total: count ?? 0
+        };
     }
 
     async function getCategories(): Promise<Category[]> {

@@ -132,7 +132,7 @@ const Profile = () => {
         }
         setUserProfile(profileData);
 
-        const allPosts: Post[] = await getPosts();
+        const {posts: allPosts}: { posts: Post[] } = await getPosts();
         const postsFromUser = allPosts.filter(p => p.user_id === targetUserId);
 
         const mappedPosts: FullCardProps[] = postsFromUser.map((post) => ({

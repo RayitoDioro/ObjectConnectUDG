@@ -57,7 +57,7 @@ const FoundObjects = () => {
         })));
 
         // B. Bajamos todas las publicaciones para las estadísticas
-        const allPosts: Post[] = await getPosts();
+        const { posts: allPosts}: { posts: Post[] } = await getPosts();
         setAllPostsForStats(allPosts);
         
         const onlyFound = allPosts.filter(post => post.post_state_id === 2);
@@ -181,14 +181,6 @@ const FoundObjects = () => {
     authorAvatarUrl: selectedObject.authorAvatarUrl,
     category: dbCategories.find(c => Number(c.id) === selectedObject.categoryId)?.name || "Otros",
   } as ExtendedCardProps : null;
-
-  // if (loading) {
-  //   return (
-  //     <Box display="flex" justifyContent="center" alignItems="center" height="60vh">
-  //       <Spinner size="xl" color="green.500" thickness="4px" />
-  //     </Box>
-  //   );
-  // }
 
   return (
     <Box bg="gray.50" minH="100vh" pb={12}>

@@ -23,7 +23,7 @@ export const useLostObjects = () => {
         const fetchLostObjects = async () => {
             setLoading(true);
             try {
-                const posts: Post[] = await getPosts(1); // 1 for "LOST"
+                const { posts }: { posts: Post[] } = await getPosts(1); // 1 for "LOST"
 
                 if (posts) {
                     const userIds = [...new Set(posts.map(post => post.user_id).filter(Boolean))];
