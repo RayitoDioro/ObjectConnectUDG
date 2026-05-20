@@ -47,7 +47,7 @@ export const UsersTable = () => {
   const [sortBy, setSortBy] = useState<SortBy>('creation_date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
