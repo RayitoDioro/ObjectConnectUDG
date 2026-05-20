@@ -95,8 +95,8 @@ const Header = () => {
                   </MenuList>
                 </Menu>
               ) : (
-                <Button as={RouterLink} to='/login' bg='brand.blueLight' color='white' _hover={{ bg: 'brand.blueTwo' }} 
-                transition="all 0.3s ease">
+                <Button as={RouterLink} to='/login' bg='brand.blueLight' color='white' _hover={{ bg: 'brand.blueTwo', textDecoration: 'none' }} 
+                transition="all 0.3s ease" className={styles.loginBtn}>
                   Iniciar sesión
                 </Button>
               )
